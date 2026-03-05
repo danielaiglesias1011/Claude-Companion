@@ -137,8 +137,18 @@ export function _resetPathCache(): void {
 // ─── Binary resolution ────────────────────────────────────────────────────────
 
 /**
+ * Convert a MINGW/Git-Bash-style path (/c/Users/...) to a Windows path (C:\Users\...).
+ * No-op on non-Windows or if the path doesn't match the MINGW pattern.
+ */
+function mingwToWindowsPath(p: string): string {
+  if (process.platform !== "win32") return p;
+  return p.replace(/^\/([a-zA-Z])\//, "$1:/").replace(/\//g, "\\");
+}
+
+/**
  * Resolve a binary name to an absolute path using the enriched PATH.
  * Returns null if the binary is not found anywhere.
+ * On Windows, prefers the .cmd wrapper so Bun can spawn it directly.
  */
 export function resolveBinary(name: string): string | null {
   if (name.startsWith("/")) {
@@ -146,9 +156,27 @@ export function resolveBinary(name: string): string | null {
   }
 
   const enrichedPath = getEnrichedPath();
+
+  // On Windows: use `where` to find the .cmd wrapper, which can be spawned directly.
+  if (process.platform === "win32") {
+    const safeName = name.replace(/[^a-zA-Z0-9._@/-]/g, "");
+    for (const candidate of [`${safeName}.cmd`, safeName]) {
+      try {
+        const resolved = execSync(`where ${candidate}`, {
+          encoding: "utf-8",
+          timeout: 5_000,
+          env: { ...process.env, PATH: enrichedPath },
+        }).trim().split(/\r?\n/)[0]; // `where` may return multiple lines
+        if (resolved) return mingwToWindowsPath(resolved);
+      } catch {
+        // try next candidate
+      }
+    }
+    return null;
+  }
+
   try {
     const resolved = execSync(`which ${name.replace(/[^a-zA-Z0-9._@/-]/g, "")}`, {
-
       encoding: "utf-8",
       timeout: 5_000,
       env: { ...process.env, PATH: enrichedPath },

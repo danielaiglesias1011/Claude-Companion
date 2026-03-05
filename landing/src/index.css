@@ -2,17 +2,17 @@
 @import "tailwindcss";
 
 @theme {
-  --color-cc-bg: #f0e8d9;
-  --color-cc-fg: #13100d;
-  --color-cc-card: #f7efe0;
-  --color-cc-primary: #b74f2b;
-  --color-cc-primary-hover: #ca5f37;
-  --color-cc-border: rgba(19, 16, 13, 0.24);
-  --color-cc-muted: #665d51;
-  --color-cc-code-bg: #181411;
-  --color-cc-code-fg: #ece4d6;
-  --color-cc-teal: #7eb7a2;
-  --color-cc-accent: #1e5e73;
+  --color-cc-bg: #fdf0f4;
+  --color-cc-fg: #1a0d10;
+  --color-cc-card: #fff5f8;
+  --color-cc-primary: #d44b7a;
+  --color-cc-primary-hover: #e0608d;
+  --color-cc-border: rgba(180, 80, 100, 0.22);
+  --color-cc-muted: #9b6b78;
+  --color-cc-code-bg: #2a1520;
+  --color-cc-code-fg: #f0d4dc;
+  --color-cc-teal: #c97fa8;
+  --color-cc-accent: #a83068;
 }
 
 .font-serif-display {
@@ -156,7 +156,7 @@
 
 .cc-card {
   border: 1px solid var(--color-cc-border);
-  box-shadow: 0 1px 0 rgba(255, 255, 255, 0.65) inset, 0 12px 28px rgba(35, 23, 14, 0.12);
+  box-shadow: 0 1px 0 rgba(255, 255, 255, 0.65) inset, 0 12px 28px rgba(180, 60, 100, 0.10);
 }
 
 .cc-label {

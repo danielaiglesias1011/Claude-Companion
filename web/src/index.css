@@ -17,26 +17,28 @@
 }
 
 @theme {
-  /* Light Mode (default) */
-  --color-cc-bg: #faf9f6;
-  --color-cc-fg: #141413;
+  /* Light Mode (default) — warm blush pink */
+  --color-cc-bg: #fdf5f7;
+  --color-cc-fg: #1a0d10;
   --color-cc-card: #ffffff;
-  --color-cc-primary: #d97757;
-  --color-cc-primary-hover: #e08b6b;
-  --color-cc-user-bubble: #f0efe8;
-  --color-cc-border: rgba(31,30,29,0.12);
-  --color-cc-muted: #6f6e69;
-  --color-cc-sidebar: #f5f4ef;
+  --color-cc-primary: #d44b7a;
+  --color-cc-primary-hover: #e0608d;
+  --color-cc-user-bubble: #fce8ed;
+  --color-cc-border: rgba(180,80,100,0.12);
+  --color-cc-muted: #9b6b78;
+  --color-cc-sidebar: #faeef1;
   --color-cc-input-bg: #ffffff;
-  --color-cc-code-bg: #f5f4ef;
-  --color-cc-code-fg: #2d2d2d;
-  --color-cc-hover: rgba(31,30,29,0.05);
-  --color-cc-active: rgba(31,30,29,0.09);
+  --color-cc-code-bg: #faeef1;
+  --color-cc-code-fg: #2d1a20;
+  --color-cc-hover: rgba(180,80,100,0.05);
+  --color-cc-active: rgba(180,80,100,0.09);
   --color-cc-success: #2d7d46;
   --color-cc-error: #c53030;
   --color-cc-warning: #b7791f;
-  --color-cc-sidebar-footer: #edece5;
-  --color-cc-separator: rgba(31,30,29,0.10);
+  --color-cc-sidebar-footer: #f5e0e7;
+  --color-cc-separator: rgba(180,80,100,0.10);
+  --color-cc-accent: #d44b7a;
+  --color-cc-bg-secondary: #fdf0f3;
 }
 
 @keyframes fadeSlideIn {
@@ -119,27 +121,29 @@
   100% { box-shadow: 0 0 0 0 transparent; }
 }
 
-/* Dark mode overrides */
+/* Dark mode overrides — deep rose */
 .dark {
-  --color-cc-bg: #262624;
-  --color-cc-fg: #faf9f5;
-  --color-cc-card: #141413;
-  --color-cc-primary: #d97757;
-  --color-cc-primary-hover: #e08b6b;
-  --color-cc-user-bubble: #30302e;
-  --color-cc-border: rgba(222,220,209,0.15);
-  --color-cc-muted: #c2c0b6;
-  --color-cc-sidebar: #1e1e1c;
-  --color-cc-input-bg: #141413;
-  --color-cc-code-bg: #141413;
-  --color-cc-code-fg: #d4d4d4;
-  --color-cc-hover: rgba(222,220,209,0.06);
-  --color-cc-active: rgba(222,220,209,0.10);
+  --color-cc-bg: #2a1520;
+  --color-cc-fg: #fdf0f3;
+  --color-cc-card: #1a0d12;
+  --color-cc-primary: #e06090;
+  --color-cc-primary-hover: #e87aaa;
+  --color-cc-user-bubble: #3d1a28;
+  --color-cc-border: rgba(240,180,200,0.15);
+  --color-cc-muted: #c9a0ae;
+  --color-cc-sidebar: #221018;
+  --color-cc-input-bg: #1a0d12;
+  --color-cc-code-bg: #1a0d12;
+  --color-cc-code-fg: #f0d4dc;
+  --color-cc-hover: rgba(240,180,200,0.06);
+  --color-cc-active: rgba(240,180,200,0.10);
   --color-cc-success: #48bb78;
   --color-cc-error: #fc8181;
   --color-cc-warning: #f6e05e;
-  --color-cc-sidebar-footer: #141413;
-  --color-cc-separator: rgba(222,220,209,0.08);
+  --color-cc-sidebar-footer: #1a0d12;
+  --color-cc-separator: rgba(240,180,200,0.08);
+  --color-cc-accent: #e06090;
+  --color-cc-bg-secondary: #221018;
 }
 
 /* Scrollbar styling — desktop only.
@@ -279,7 +283,7 @@ select {
   align-items: center;
   gap: 6px;
   padding: 6px 12px;
-  background: rgba(31,30,29,0.15);
+  background: rgba(180,80,100,0.08);
   font-size: 11px;
   border-bottom: 1px solid var(--color-cc-border);
   position: sticky;
@@ -287,13 +291,13 @@ select {
   z-index: 1;
 }
 .dark .diff-file-header {
-  background: rgba(222,220,209,0.06);
+  background: rgba(240,180,200,0.06);
 }
 .diff-hunk-header {
   padding: 4px 12px;
   color: var(--color-cc-primary);
   font-size: 11px;
-  background: rgba(217, 119, 87, 0.06);
+  background: rgba(212, 75, 122, 0.06);
 }
 .diff-line {
   display: flex;
