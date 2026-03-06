@@ -464,15 +464,16 @@ export class CliLauncher {
     // Claude Code rejects bypassPermissions when running with root/sudo. Most
     // container images run as root by default, so downgrade to acceptEdits unless
     // explicitly forced.
+    const isRoot = process.getuid?.() === 0;
     let effectivePermissionMode = options.permissionMode;
     if (
-      isContainerized
+      (isContainerized || isRoot)
       && options.permissionMode === "bypassPermissions"
       && process.env.COMPANION_FORCE_BYPASS_IN_CONTAINER !== "1"
     ) {
       console.warn(
-        `[cli-launcher] Session ${sessionId}: downgrading container permission mode ` +
-        `from bypassPermissions to acceptEdits (set COMPANION_FORCE_BYPASS_IN_CONTAINER=1 to force bypass).`,
+        `[cli-launcher] Session ${sessionId}: downgrading permission mode ` +
+        `from bypassPermissions to acceptEdits (running as root; set COMPANION_FORCE_BYPASS_IN_CONTAINER=1 to force bypass).`,
       );
       effectivePermissionMode = "acceptEdits";
       info.permissionMode = "acceptEdits";
