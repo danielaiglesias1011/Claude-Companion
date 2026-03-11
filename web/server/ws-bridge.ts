@@ -432,6 +432,15 @@ export class WsBridge {
     const session = this.sessions.get(sessionId);
     if (!session) return;
 
+    // Only clear cliSocket if the closing WebSocket is the current one.
+    // Claude CLI can open multiple WebSocket connections to the same session;
+    // if a newer connection replaced an older one, closing the old one should
+    // not null out the active socket or trigger a false "disconnected" state.
+    if (session.cliSocket !== ws) {
+      console.log(`[ws-bridge] Stale CLI WebSocket closed for session ${sessionId} (ignored)`);
+      return;
+    }
+
     session.cliSocket = null;
     console.log(`[ws-bridge] CLI disconnected for session ${sessionId}`);
     this.broadcastToBrowsers(session, { type: "cli_disconnected" });
