@@ -1,4 +1,4 @@
-import { useState, useMemo, type ComponentProps } from "react";
+import { useState, useMemo, useCallback, type ComponentProps, type ReactNode } from "react";
 import Markdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 import type { ChatMessage, ContentBlock } from "../types.js";
@@ -177,11 +177,16 @@ function MarkdownContent({ text, showCursor = false }: { text: string; showCurso
           li: ({ children }) => (
             <li className="text-cc-fg">{children}</li>
           ),
-          a: ({ href, children }) => (
-            <a href={href} target="_blank" rel="noopener noreferrer" className="text-cc-primary hover:underline">
-              {children}
-            </a>
-          ),
+          a: ({ href, children }) => {
+            if (href && !href.startsWith("http") && !href.startsWith("//") && DOWNLOADABLE_EXTENSIONS.test(href)) {
+              return <DownloadLink path={href}>{children}</DownloadLink>;
+            }
+            return (
+              <a href={href} target="_blank" rel="noopener noreferrer" className="text-cc-primary hover:underline">
+                {children}
+              </a>
+            );
+          },
           blockquote: ({ children }) => (
             <blockquote className="border-l-2 border-cc-primary/30 pl-3 my-2 text-cc-muted italic">
               {children}
@@ -197,13 +202,17 @@ function MarkdownContent({ text, showCursor = false }: { text: string; showCurso
 
             if (isBlock) {
               const lang = match?.[1] || "";
+              const codeText = typeof children === "string" ? children : String(children ?? "");
               return (
                 <div className="my-2 rounded-lg overflow-hidden border border-cc-border">
-                  {lang && (
-                    <div className="px-3 py-1.5 bg-cc-code-bg/80 border-b border-cc-border text-[10px] text-cc-muted font-mono-code uppercase tracking-wider">
-                      {lang}
-                    </div>
-                  )}
+                  <div className="flex items-center justify-between px-3 py-1.5 bg-cc-code-bg/80 border-b border-cc-border">
+                    {lang ? (
+                      <span className="text-[10px] text-cc-muted font-mono-code uppercase tracking-wider">{lang}</span>
+                    ) : (
+                      <span />
+                    )}
+                    <CopyButton text={codeText} />
+                  </div>
                   <pre className="px-2 sm:px-3 py-2 sm:py-2.5 bg-cc-code-bg text-cc-code-fg text-[12px] sm:text-[13px] font-mono-code leading-relaxed overflow-x-auto">
                     <code>{children}</code>
                   </pre>
@@ -368,6 +377,89 @@ function ToolGroupBlock({ name, items }: { name: string; items: ToolGroupItem[] 
         </div>
       )}
     </div>
+  );
+}
+
+function CopyButton({ text }: { text: string }) {
+  const [copied, setCopied] = useState(false);
+
+  const handleCopy = useCallback(() => {
+    navigator.clipboard.writeText(text).then(() => {
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    });
+  }, [text]);
+
+  return (
+    <button
+      onClick={handleCopy}
+      className="flex items-center gap-1 text-[10px] text-cc-muted hover:text-cc-fg transition-colors cursor-pointer"
+      title="Copy to clipboard"
+    >
+      {copied ? (
+        <>
+          <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-3 h-3 text-green-500">
+            <path d="M2 8l4 4 8-8" />
+          </svg>
+          <span className="text-green-500">Copied</span>
+        </>
+      ) : (
+        <>
+          <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className="w-3 h-3">
+            <rect x="5" y="2" width="8" height="10" rx="1.5" />
+            <path d="M3 4H2.5A1.5 1.5 0 001 5.5v8A1.5 1.5 0 002.5 15h7A1.5 1.5 0 0011 13.5V13" />
+          </svg>
+          <span>Copy</span>
+        </>
+      )}
+    </button>
+  );
+}
+
+const DOWNLOADABLE_EXTENSIONS = /\.(docx?|xlsx?|pptx?|pdf|csv|zip|gz|json|txt|md)$/i;
+
+function DownloadLink({ path, children }: { path: string; children: ReactNode }) {
+  const [downloading, setDownloading] = useState(false);
+  const filename = path.split("/").pop() || "download";
+
+  const handleDownload = async () => {
+    setDownloading(true);
+    try {
+      const res = await fetch(`/api/fs/raw?path=${encodeURIComponent(path)}`);
+      if (!res.ok) throw new Error("File not found");
+      const blob = await res.blob();
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = filename;
+      a.click();
+      URL.revokeObjectURL(url);
+    } catch {
+      window.open(path, "_blank");
+    } finally {
+      setDownloading(false);
+    }
+  };
+
+  return (
+    <button
+      onClick={handleDownload}
+      disabled={downloading}
+      className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-cc-primary/10 text-cc-primary text-[13px] hover:bg-cc-primary/20 transition-colors border border-cc-primary/20 cursor-pointer disabled:opacity-50"
+    >
+      {downloading ? (
+        <svg className="w-3.5 h-3.5 animate-spin" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="2">
+          <circle cx="8" cy="8" r="6" strokeOpacity="0.3" />
+          <path d="M8 2a6 6 0 016 6" strokeLinecap="round" />
+        </svg>
+      ) : (
+        <svg className="w-3.5 h-3.5" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+          <path d="M8 2v8M5 7l3 3 3-3" />
+          <path d="M2 12v1a1 1 0 001 1h10a1 1 0 001-1v-1" />
+        </svg>
+      )}
+      {children || filename}
+    </button>
   );
 }
 
