@@ -20,7 +20,7 @@ export function MessageBubble({ message }: { message: ChatMessage }) {
   if (message.role === "user") {
     return (
       <div className="flex justify-end animate-[fadeSlideIn_0.2s_ease-out]">
-        <div className="max-w-[85%] sm:max-w-[80%] px-3 sm:px-4 py-2.5 rounded-[14px] rounded-br-[4px] bg-cc-user-bubble text-cc-fg">
+        <div className="max-w-[85%] sm:max-w-[80%] px-3 sm:px-4 py-2.5 rounded-[14px] rounded-br-[4px] bg-gradient-to-br from-cc-user-bubble to-cc-primary/[0.08] text-cc-fg shadow-[0_2px_12px_rgba(212,75,122,0.10),inset_0_1px_0_rgba(255,255,255,0.6)]">
           {message.images && message.images.length > 0 && (
             <div className="flex gap-2 flex-wrap mb-2">
               {message.images.map((img, i) => (
@@ -96,11 +96,23 @@ function mapToolUsesById(blocks: ContentBlock[]): Map<string, ToolUseInfo> {
   return map;
 }
 
+function getMessageText(message: ChatMessage): string {
+  if (message.contentBlocks && message.contentBlocks.length > 0) {
+    return message.contentBlocks
+      .filter((b) => b.type === "text")
+      .map((b) => (b.type === "text" ? b.text : ""))
+      .join("\n\n")
+      .trim();
+  }
+  return message.content || "";
+}
+
 function AssistantMessage({ message }: { message: ChatMessage }) {
   const blocks = message.contentBlocks || [];
 
   const grouped = useMemo(() => groupContentBlocks(blocks), [blocks]);
   const toolUseById = useMemo(() => mapToolUsesById(blocks), [blocks]);
+  const copyText = useMemo(() => getMessageText(message), [message]);
 
   if (blocks.length === 0 && message.content) {
     return (
@@ -108,27 +120,35 @@ function AssistantMessage({ message }: { message: ChatMessage }) {
         <AssistantAvatar />
         <div className="flex-1 min-w-0">
           <MarkdownContent text={message.content} showCursor={!!message.isStreaming} />
+          {!message.isStreaming && copyText && (
+            <div className="mt-1.5">
+              <CopyButton text={copyText} label="Copy response" />
+            </div>
+          )}
         </div>
       </div>
     );
   }
 
   return (
-    <div className="flex items-start gap-3">
+    <div className="flex items-start gap-3 group">
       <AssistantAvatar />
       <div className="flex-1 min-w-0 space-y-3">
         {grouped.map((group, i) => {
           if (group.kind === "content") {
             return <ContentBlockRenderer key={i} block={group.block} toolUseById={toolUseById} />;
           }
-          // Single tool_use renders as before
           if (group.items.length === 1) {
             const item = group.items[0];
             return <ToolBlock key={i} name={item.name} input={item.input} toolUseId={item.id} />;
           }
-          // Grouped tool_uses
           return <ToolGroupBlock key={i} name={group.name} items={group.items} />;
         })}
+        {!message.isStreaming && copyText && (
+          <div className="mt-1.5">
+            <CopyButton text={copyText} label="Copy response" />
+          </div>
+        )}
       </div>
     </div>
   );
@@ -204,8 +224,8 @@ function MarkdownContent({ text, showCursor = false }: { text: string; showCurso
               const lang = match?.[1] || "";
               const codeText = typeof children === "string" ? children : String(children ?? "");
               return (
-                <div className="my-2 rounded-lg overflow-hidden border border-cc-border">
-                  <div className="flex items-center justify-between px-3 py-1.5 bg-cc-code-bg/80 border-b border-cc-border">
+                <div className="my-2 rounded-xl overflow-hidden border border-cc-border shadow-[0_2px_8px_rgba(0,0,0,0.04),inset_0_1px_0_rgba(255,255,255,0.06)]">
+                  <div className="flex items-center justify-between px-3 py-1.5 bg-gradient-to-b from-cc-code-bg to-cc-code-bg/80 border-b border-cc-border">
                     {lang ? (
                       <span className="text-[10px] text-cc-muted font-mono-code uppercase tracking-wider">{lang}</span>
                     ) : (
@@ -309,10 +329,10 @@ function BashResultBlock({ text, isError }: { text: string; isError: boolean }) 
   const rendered = showFull || !hasMore ? text : lines.slice(-20).join("\n");
 
   return (
-    <div className={`rounded-lg border ${
+    <div className={`rounded-xl border ${
       isError
         ? "bg-cc-error/5 border-cc-error/20"
-        : "bg-cc-card border-cc-border"
+        : "bg-cc-card border-cc-border shadow-[0_1px_4px_rgba(0,0,0,0.04),inset_0_1px_0_rgba(255,255,255,0.06)]"
     }`}>
       <div className="flex items-center justify-between px-3 py-1.5 border-b border-cc-border">
         <span className={`text-[10px] font-medium ${
@@ -344,7 +364,7 @@ function ToolGroupBlock({ name, items }: { name: string; items: ToolGroupItem[] 
   const label = getToolLabel(name);
 
   return (
-    <div className="border border-cc-border rounded-[10px] overflow-hidden bg-cc-card">
+    <div className="border border-cc-border/80 rounded-[10px] overflow-hidden bg-cc-card shadow-[0_1px_4px_rgba(0,0,0,0.04),inset_0_1px_0_rgba(255,255,255,0.08)]">
       <button
         onClick={() => setOpen(!open)}
         className="w-full flex items-center gap-2.5 px-3 py-2 text-left hover:bg-cc-hover transition-colors cursor-pointer"
@@ -380,7 +400,7 @@ function ToolGroupBlock({ name, items }: { name: string; items: ToolGroupItem[] 
   );
 }
 
-function CopyButton({ text }: { text: string }) {
+function CopyButton({ text, label = "Copy" }: { text: string; label?: string }) {
   const [copied, setCopied] = useState(false);
 
   const handleCopy = useCallback(() => {
@@ -393,7 +413,7 @@ function CopyButton({ text }: { text: string }) {
   return (
     <button
       onClick={handleCopy}
-      className="flex items-center gap-1 text-[10px] text-cc-muted hover:text-cc-fg transition-colors cursor-pointer"
+      className="flex items-center gap-1 text-[10px] text-cc-muted hover:text-cc-fg transition-colors cursor-pointer px-2 py-0.5 rounded-md hover:bg-cc-hover"
       title="Copy to clipboard"
     >
       {copied ? (
@@ -401,7 +421,7 @@ function CopyButton({ text }: { text: string }) {
           <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-3 h-3 text-green-500">
             <path d="M2 8l4 4 8-8" />
           </svg>
-          <span className="text-green-500">Copied</span>
+          <span className="text-green-500">Copied!</span>
         </>
       ) : (
         <>
@@ -409,7 +429,7 @@ function CopyButton({ text }: { text: string }) {
             <rect x="5" y="2" width="8" height="10" rx="1.5" />
             <path d="M3 4H2.5A1.5 1.5 0 001 5.5v8A1.5 1.5 0 002.5 15h7A1.5 1.5 0 0011 13.5V13" />
           </svg>
-          <span>Copy</span>
+          <span>{label}</span>
         </>
       )}
     </button>
@@ -445,7 +465,7 @@ function DownloadLink({ path, children }: { path: string; children: ReactNode })
     <button
       onClick={handleDownload}
       disabled={downloading}
-      className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-cc-primary/10 text-cc-primary text-[13px] hover:bg-cc-primary/20 transition-colors border border-cc-primary/20 cursor-pointer disabled:opacity-50"
+      className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-gradient-to-b from-cc-primary/12 to-cc-primary/8 text-cc-primary text-[13px] hover:from-cc-primary/20 hover:to-cc-primary/15 transition-colors border border-cc-primary/25 cursor-pointer disabled:opacity-50 shadow-[0_1px_3px_rgba(212,75,122,0.08)]"
     >
       {downloading ? (
         <svg className="w-3.5 h-3.5 animate-spin" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="2">
@@ -469,7 +489,7 @@ function ThinkingBlock({ text }: { text: string }) {
   const [open, setOpen] = useState(Boolean(normalized));
 
   return (
-    <div className="border border-cc-border rounded-[12px] overflow-hidden bg-cc-card/70 backdrop-blur-[2px]">
+    <div className="border border-cc-border/80 rounded-[12px] overflow-hidden bg-cc-card/80 backdrop-blur-[3px] shadow-[0_2px_8px_rgba(0,0,0,0.04),inset_0_1px_0_rgba(255,255,255,0.08)]">
       <button
         onClick={() => setOpen(!open)}
         className="w-full flex items-center gap-2 px-3 py-2.5 text-xs text-cc-muted hover:bg-cc-hover/70 transition-colors cursor-pointer"

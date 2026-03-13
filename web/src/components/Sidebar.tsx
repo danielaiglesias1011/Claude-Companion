@@ -441,7 +441,7 @@ export function Sidebar() {
   };
 
   return (
-    <aside className="w-full md:w-[260px] h-full flex flex-col bg-cc-sidebar">
+    <aside className="w-full md:w-[260px] h-full flex flex-col bg-gradient-to-b from-cc-sidebar to-cc-sidebar/95">
       {/* Header */}
       <div className="p-3.5 pb-2">
         <div className="flex items-center gap-2.5">
@@ -451,7 +451,7 @@ export function Sidebar() {
             onClick={handleNewSession}
             title="New Session"
             aria-label="New Session"
-            className="ml-auto hidden md:flex w-8 h-8 rounded-lg bg-cc-primary hover:bg-cc-primary-hover text-white items-center justify-center transition-colors duration-150 cursor-pointer"
+            className="ml-auto hidden md:flex w-8 h-8 rounded-lg bg-gradient-to-b from-cc-primary to-cc-primary/90 hover:from-cc-primary-hover hover:to-cc-primary-hover/90 text-white items-center justify-center transition-all duration-150 cursor-pointer shadow-[0_2px_8px_rgba(212,75,122,0.28)]"
           >
             <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="2.5" className="w-3.5 h-3.5">
               <path d="M8 3v10M3 8h10" />

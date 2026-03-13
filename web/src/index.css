@@ -152,8 +152,8 @@
    causes a persistent horizontal scrollbar. */
 @media (pointer: fine) {
   ::-webkit-scrollbar {
-    width: 6px;
-    height: 6px;
+    width: 5px;
+    height: 5px;
   }
 
   ::-webkit-scrollbar-track {
@@ -161,13 +161,12 @@
   }
 
   ::-webkit-scrollbar-thumb {
-    background: var(--color-cc-muted);
-    border-radius: 3px;
-    opacity: 0.4;
+    background: color-mix(in srgb, var(--color-cc-muted) 35%, transparent);
+    border-radius: 999px;
   }
 
   ::-webkit-scrollbar-thumb:hover {
-    opacity: 0.6;
+    background: color-mix(in srgb, var(--color-cc-muted) 55%, transparent);
   }
 }
 
