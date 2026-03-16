@@ -10,8 +10,69 @@ const lastSeqBySession = new Map<string, number>();
 const taskCounters = new Map<string, number>();
 const streamingPhaseBySession = new Map<string, "thinking" | "text">();
 const streamingDraftMessageIdBySession = new Map<string, string>();
+const pendingOutgoingBySession = new Map<string, BrowserOutgoingMessage[]>();
 /** Track processed tool_use IDs to prevent duplicate task creation */
 const processedToolUseIds = new Map<string, Set<string>>();
+
+function isSocketUsable(ws: WebSocket | undefined): boolean {
+  return !!ws && (ws.readyState === WebSocket.OPEN || ws.readyState === WebSocket.CONNECTING);
+}
+
+function shouldReconnectSession(sessionId: string): boolean {
+  const store = useStore.getState();
+  const sdkSession = store.sdkSessions.find((s) => s.sessionId === sessionId);
+  if (sdkSession) return !sdkSession.archived;
+  // Fallback for freshly-created sessions that may not be in sdkSessions yet.
+  return store.currentSessionId === sessionId;
+}
+
+function getReconnectCandidates(): string[] {
+  const store = useStore.getState();
+  const ids = new Set<string>();
+  for (const s of store.sdkSessions) {
+    if (!s.archived) ids.add(s.sessionId);
+  }
+  if (store.currentSessionId) ids.add(store.currentSessionId);
+  return Array.from(ids);
+}
+
+// ── Page visibility handling ─────────────────────────────────────────────────
+// Mobile browsers (Android Chrome, iOS Safari) aggressively kill WebSocket
+// connections when the page is backgrounded. Without this handler, the frontend
+// enters a rapid connect/disconnect cycle: WS opens, browser kills it, 2s
+// reconnect timer fires, WS opens again, browser kills it again...
+//
+// Solution: when the page becomes hidden, pause all reconnect attempts. When
+// the page becomes visible again, immediately reconnect all active sessions.
+let pageHidden = typeof document !== "undefined" ? document.hidden : false;
+
+if (typeof document !== "undefined") {
+  document.addEventListener("visibilitychange", () => {
+    if (document.hidden) {
+      pageHidden = true;
+      // Cancel all pending reconnect timers — no point reconnecting while hidden
+      for (const [sessionId, timer] of reconnectTimers) {
+        clearTimeout(timer);
+        reconnectTimers.delete(sessionId);
+      }
+    } else {
+      pageHidden = false;
+      // Page is visible again — reconnect all known active sessions.
+      for (const sessionId of getReconnectCandidates()) {
+        // Re-check in case sdkSessions changed after candidate collection.
+        if (!shouldReconnectSession(sessionId)) continue;
+        const ws = sockets.get(sessionId);
+        if (!isSocketUsable(ws)) {
+          if (ws) {
+            try { ws.close(); } catch {}
+            sockets.delete(sessionId);
+          }
+          connectSession(sessionId);
+        }
+      }
+    }
+  });
+}
 
 function normalizePath(path: string): string {
   const isAbs = path.startsWith("/");
@@ -236,6 +297,21 @@ function nextId(): string {
   return `msg-${Date.now()}-${++idCounter}`;
 }
 
+function enqueueOutgoing(sessionId: string, msg: BrowserOutgoingMessage) {
+  const queued = pendingOutgoingBySession.get(sessionId) || [];
+  queued.push(msg);
+  pendingOutgoingBySession.set(sessionId, queued);
+}
+
+function flushQueuedOutgoing(sessionId: string, ws: WebSocket) {
+  const queued = pendingOutgoingBySession.get(sessionId);
+  if (!queued?.length || ws.readyState !== WebSocket.OPEN) return;
+  pendingOutgoingBySession.delete(sessionId);
+  for (const msg of queued) {
+    ws.send(JSON.stringify(msg));
+  }
+}
+
 function setStreamingDraftMessage(sessionId: string, content: string) {
   const store = useStore.getState();
   const existing = store.messages.get(sessionId) || [];
@@ -308,6 +384,10 @@ function clearStreamingDraftMessage(sessionId: string) {
 
 function nextClientMsgId(): string {
   return `cmsg-${Date.now()}-${++clientMsgCounter}`;
+}
+
+export function createClientMessageId(): string {
+  return nextClientMsgId();
 }
 
 const IDEMPOTENT_OUTGOING_TYPES = new Set<BrowserOutgoingMessage["type"]>([
@@ -429,6 +509,7 @@ function handleMessage(sessionId: string, event: MessageEvent) {
   try {
     data = JSON.parse(event.data);
   } catch {
+    console.warn(`[ws] Failed to parse incoming message for session ${sessionId}:`, event.data?.substring?.(0, 120));
     return;
   }
 
@@ -688,6 +769,16 @@ function handleParsedMessage(
       break;
     }
 
+    case "user_message": {
+      store.appendMessage(sessionId, {
+        id: data.id || nextId(),
+        role: "user",
+        content: data.content,
+        timestamp: data.timestamp || Date.now(),
+      });
+      break;
+    }
+
     case "system_event": {
       // Update structured process state from task_notification
       if (data.event?.subtype === "task_notification") {
@@ -740,6 +831,23 @@ function handleParsedMessage(
         content: data.message,
         timestamp: Date.now(),
       });
+      break;
+    }
+
+    case "session_phase": {
+      const phase = data.phase;
+      if (phase === "terminated" || phase === "reconnecting") {
+        store.setCliConnected(sessionId, false);
+        store.setSessionStatus(sessionId, null);
+      } else if (phase === "starting" || phase === "initializing") {
+        store.setCliConnected(sessionId, false);
+      } else {
+        store.setCliConnected(sessionId, true);
+        if (phase === "ready") store.setSessionStatus(sessionId, "idle");
+        else if (phase === "streaming") store.setSessionStatus(sessionId, "running");
+        else if (phase === "compacting") store.setSessionStatus(sessionId, "compacting");
+        else if (phase === "awaiting_permission") store.setSessionStatus(sessionId, "running");
+      }
       break;
     }
 
@@ -915,7 +1023,12 @@ function handleParsedMessage(
 }
 
 export function connectSession(sessionId: string) {
-  if (sockets.has(sessionId)) return;
+  const existing = sockets.get(sessionId);
+  if (isSocketUsable(existing)) return;
+  if (existing) {
+    try { existing.close(); } catch {}
+    sockets.delete(sessionId);
+  }
 
   const store = useStore.getState();
   store.setConnectionStatus(sessionId, "connecting");
@@ -928,6 +1041,7 @@ export function connectSession(sessionId: string) {
     // proving the subscription succeeded. handleMessage promotes to "connected".
     const lastSeq = getLastSeq(sessionId);
     ws.send(JSON.stringify({ type: "session_subscribe", last_seq: lastSeq }));
+    flushQueuedOutgoing(sessionId, ws);
     // Clear any reconnect timer
     const timer = reconnectTimers.get(sessionId);
     if (timer) {
@@ -939,6 +1053,8 @@ export function connectSession(sessionId: string) {
   ws.onmessage = (event) => handleMessage(sessionId, event);
 
   ws.onclose = () => {
+    // Guard against stale close events from a replaced socket.
+    if (sockets.get(sessionId) !== ws) return;
     sockets.delete(sessionId);
     useStore.getState().setConnectionStatus(sessionId, "disconnected");
     scheduleReconnect(sessionId);
@@ -951,14 +1067,15 @@ export function connectSession(sessionId: string) {
 
 function scheduleReconnect(sessionId: string) {
   if (reconnectTimers.has(sessionId)) return;
+  // Don't schedule reconnect when page is hidden — mobile browsers will just
+  // kill the new connection too, creating a wasteful connect/disconnect cycle.
+  // The visibilitychange handler will reconnect when the page becomes visible.
+  if (pageHidden) return;
   const timer = setTimeout(() => {
     reconnectTimers.delete(sessionId);
-    const store = useStore.getState();
-    // Reconnect any active (non-archived) session
-    const sdkSession = store.sdkSessions.find((s) => s.sessionId === sessionId);
-    if (sdkSession && !sdkSession.archived) {
-      connectSession(sessionId);
-    }
+    // Re-check visibility — page may have been hidden during the delay
+    if (pageHidden) return;
+    if (shouldReconnectSession(sessionId)) connectSession(sessionId);
   }, WS_RECONNECT_DELAY_MS);
   reconnectTimers.set(sessionId, timer);
 }
@@ -974,12 +1091,14 @@ export function disconnectSession(sessionId: string) {
     ws.close();
     sockets.delete(sessionId);
   }
+  useStore.getState().setConnectionStatus(sessionId, "disconnected");
   processedToolUseIds.delete(sessionId);
   pendingBackgroundBash.delete(sessionId);
   taskCounters.delete(sessionId);
   streamingPhaseBySession.delete(sessionId);
   streamingDraftMessageIdBySession.delete(sessionId);
   lastSeqBySession.delete(sessionId);
+  pendingOutgoingBySession.delete(sessionId);
 }
 
 export function disconnectAll() {
@@ -989,6 +1108,9 @@ export function disconnectAll() {
 }
 
 export function connectAllSessions(sessions: SdkSessionInfo[]) {
+  // Skip connection attempts when page is hidden — mobile browsers kill
+  // backgrounded WS connections, so connecting here would just cycle.
+  if (pageHidden) return;
   for (const s of sessions) {
     if (!s.archived) {
       connectSession(s.sessionId);
@@ -1016,7 +1138,8 @@ export function waitForConnection(sessionId: string): Promise<void> {
 export function sendToSession(sessionId: string, msg: BrowserOutgoingMessage) {
   const ws = sockets.get(sessionId);
   let outgoing: BrowserOutgoingMessage = msg;
-  if (IDEMPOTENT_OUTGOING_TYPES.has(msg.type)) {
+  const isIdempotent = IDEMPOTENT_OUTGOING_TYPES.has(msg.type);
+  if (isIdempotent) {
     switch (msg.type) {
       case "user_message":
       case "permission_response":
@@ -1034,8 +1157,14 @@ export function sendToSession(sessionId: string, msg: BrowserOutgoingMessage) {
         break;
     }
   }
+
   if (ws?.readyState === WebSocket.OPEN) {
     ws.send(JSON.stringify(outgoing));
+    return;
+  }
+
+  if (isIdempotent) {
+    enqueueOutgoing(sessionId, outgoing);
   }
 }
 

@@ -96,7 +96,8 @@ export function buildFallbackPath(): string {
     } catch { /* ignore */ }
   }
 
-  return [...new Set(candidates.filter((dir) => existsSync(dir)))].join(":");
+  const pathSep = process.platform === "win32" ? ";" : ":";
+  return [...new Set(candidates.filter((dir) => existsSync(dir)))].join(pathSep);
 }
 
 // ─── Enriched PATH (cached) ───────────────────────────────────────────────────
@@ -113,9 +114,10 @@ export function getEnrichedPath(): string {
 
   const currentPath = process.env.PATH || "";
   const userPath = captureUserShellPath();
+  const pathSep = process.platform === "win32" ? ";" : ":";
 
   // Merge: user shell PATH first (takes precedence), then current process PATH
-  const allDirs = [...userPath.split(":"), ...currentPath.split(":")];
+  const allDirs = [...userPath.split(pathSep), ...currentPath.split(pathSep)];
   const seen = new Set<string>();
   const deduped: string[] = [];
   for (const dir of allDirs) {
@@ -125,7 +127,7 @@ export function getEnrichedPath(): string {
     }
   }
 
-  _cachedPath = deduped.join(":");
+  _cachedPath = deduped.join(pathSep);
   return _cachedPath;
 }
 
@@ -137,54 +139,42 @@ export function _resetPathCache(): void {
 // ─── Binary resolution ────────────────────────────────────────────────────────
 
 /**
- * Convert a MINGW/Git-Bash-style path (/c/Users/...) to a Windows path (C:\Users\...).
- * No-op on non-Windows or if the path doesn't match the MINGW pattern.
- */
-function mingwToWindowsPath(p: string): string {
-  if (process.platform !== "win32") return p;
-  return p.replace(/^\/([a-zA-Z])\//, "$1:/").replace(/\//g, "\\");
-}
-
-/**
  * Resolve a binary name to an absolute path using the enriched PATH.
  * Returns null if the binary is not found anywhere.
- * On Windows, prefers the .cmd wrapper so Bun can spawn it directly.
  */
 export function resolveBinary(name: string): string | null {
   if (name.startsWith("/")) {
     return existsSync(name) ? name : null;
   }
+  // On Windows, also accept absolute paths like C:\... or D:\...
+  if (process.platform === "win32" && /^[a-zA-Z]:[/\\]/.test(name)) {
+    return existsSync(name) ? name : null;
+  }
 
+  const sanitized = name.replace(/[^a-zA-Z0-9._@/-]/g, "");
   const enrichedPath = getEnrichedPath();
 
-  // On Windows: use `where` to find the .cmd wrapper, which can be spawned directly.
-  if (process.platform === "win32") {
-    const safeName = name.replace(/[^a-zA-Z0-9._@/-]/g, "");
-    for (const candidate of [`${safeName}.cmd`, safeName]) {
-      try {
-        const resolved = execSync(`where ${candidate}`, {
-          encoding: "utf-8",
-          timeout: 5_000,
-          env: { ...process.env, PATH: enrichedPath },
-        }).trim().split(/\r?\n/)[0]; // `where` may return multiple lines
-        if (resolved) return mingwToWindowsPath(resolved);
-      } catch {
-        // try next candidate
+  // Try `where` first on Windows (returns native Win32 paths), then `which` as fallback
+  const commands = process.platform === "win32" ? ["where", "which"] : ["which"];
+  for (const cmd of commands) {
+    try {
+      const result = execSync(`${cmd} ${sanitized}`, {
+        encoding: "utf-8",
+        timeout: 5_000,
+        env: { ...process.env, PATH: enrichedPath },
+      }).trim();
+      if (!result) continue;
+      // `where` on Windows may return multiple lines; prefer .cmd for Bun.spawn compatibility
+      if (cmd === "where") {
+        const lines = result.split(/\r?\n/).filter(Boolean);
+        return lines.find(l => l.endsWith(".cmd")) || lines[0];
       }
+      return result;
+    } catch {
+      continue;
     }
-    return null;
   }
-
-  try {
-    const resolved = execSync(`which ${name.replace(/[^a-zA-Z0-9._@/-]/g, "")}`, {
-      encoding: "utf-8",
-      timeout: 5_000,
-      env: { ...process.env, PATH: enrichedPath },
-    }).trim();
-    return resolved || null;
-  } catch {
-    return null;
-  }
+  return null;
 }
 
 /**

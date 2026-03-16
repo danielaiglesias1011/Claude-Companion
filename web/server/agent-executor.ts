@@ -110,14 +110,14 @@ export class AgentExecutor {
   async executeAgent(
     agentId: string,
     input?: string,
-    opts?: { force?: boolean; triggerType?: "manual" | "webhook" | "schedule" | "chat" },
+    opts?: { force?: boolean; triggerType?: "manual" | "webhook" | "schedule" | "linear" },
   ): Promise<SdkSessionInfo | undefined> {
     const agent = agentStore.getAgent(agentId);
     if (!agent) return;
     if (!agent.enabled && !opts?.force) return;
 
-    // Overlap prevention: skip if previous execution is still running
-    if (agent.lastSessionId && this.launcher.isAlive(agent.lastSessionId)) {
+    // Overlap prevention: skip if previous execution is still running (unless forced)
+    if (!opts?.force && agent.lastSessionId && this.launcher.isAlive(agent.lastSessionId)) {
       console.log(`[agent-executor] Skipping "${agent.name}" — previous execution still running (${agent.lastSessionId})`);
       return;
     }

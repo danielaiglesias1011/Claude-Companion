@@ -9,12 +9,23 @@ vi.mock("../agent-store.js", () => ({
   updateAgent: vi.fn(),
   deleteAgent: vi.fn(() => false),
   regenerateWebhookSecret: vi.fn(() => null),
-  sanitizeAgentForResponse: vi.fn((agent) => agent),
-  stripChatCredentials: vi.fn((agent) => agent),
+}));
+
+// ─── Mock settings-manager module ──────────────────────────────────────────
+vi.mock("../settings-manager.js", () => ({
+  getSettings: vi.fn(() => ({
+    linearOAuthClientId: "",
+    linearOAuthClientSecret: "",
+    linearOAuthWebhookSecret: "",
+    linearOAuthAccessToken: "",
+    linearOAuthRefreshToken: "",
+  })),
+  updateSettings: vi.fn(),
 }));
 
 import { Hono } from "hono";
 import * as agentStore from "../agent-store.js";
+import { getSettings, updateSettings } from "../settings-manager.js";
 import type { AgentConfig } from "../agent-types.js";
 import { registerAgentRoutes } from "./agent-routes.js";
 
@@ -49,14 +60,7 @@ function createMockExecutor() {
     stopAgent: vi.fn(),
     executeAgentManually: vi.fn(),
     getExecutions: vi.fn(() => []),
-  };
-}
-
-/** Build a mock ChatBot with vi.fn() stubs for reload/remove hooks. */
-function createMockChatBot() {
-  return {
-    reloadAgent: vi.fn(async () => {}),
-    removeAgent: vi.fn(async () => {}),
+    listAllExecutions: vi.fn(() => ({ executions: [] as Record<string, unknown>[], total: 0 })),
   };
 }
 
@@ -64,18 +68,16 @@ function createMockChatBot() {
 
 let app: Hono;
 let executor: ReturnType<typeof createMockExecutor>;
-let chatBot: ReturnType<typeof createMockChatBot>;
 
 beforeEach(() => {
   vi.clearAllMocks();
 
   executor = createMockExecutor();
-  chatBot = createMockChatBot();
 
   // Create a Hono app and mount agent routes under /api
   app = new Hono();
   const api = new Hono();
-  registerAgentRoutes(api, executor as any, chatBot as any);
+  registerAgentRoutes(api, executor as any);
   app.route("/api", api);
 });
 
@@ -606,131 +608,312 @@ describe("POST /api/agents/:id/webhook/:secret", () => {
   });
 });
 
-// ─── chatBot reload hooks ───────────────────────────────────────────────────
-// These tests verify that the routes correctly notify the chatBot when agents
-// are created, updated, renamed, deleted, or toggled so the chat runtime
-// stays in sync with the agent store.
+// ─── POST /api/agents — credential staging ─────────────────────────────────
 
-describe("chatBot reload hooks", () => {
-  it("POST /agents calls chatBot.reloadAgent with the created agent's ID", async () => {
-    const created = makeAgent({ id: "new-agent", name: "New Agent" });
-    vi.mocked(agentStore.createAgent).mockReturnValue(created);
+describe("POST /api/agents — Linear credential staging", () => {
+  it("copies global OAuth credentials to the agent and clears them from settings when creating a Linear agent", async () => {
+    // When a Linear agent is created with no credentials on the agent itself,
+    // the route should copy staged credentials from global settings to the agent
+    // and then clear them from global settings (one-time staging flow).
+    const createdAgent = makeAgent({
+      id: "linear-agent",
+      name: "Linear Agent",
+      triggers: {
+        linear: { enabled: true },
+      },
+    });
+    vi.mocked(agentStore.createAgent).mockReturnValue(createdAgent);
+
+    // Simulate global settings with staged OAuth credentials
+    vi.mocked(getSettings).mockReturnValue({
+      linearOAuthClientId: "client-id-123",
+      linearOAuthClientSecret: "client-secret-456",
+      linearOAuthWebhookSecret: "webhook-secret-789",
+      linearOAuthAccessToken: "access-token-abc",
+      linearOAuthRefreshToken: "refresh-token-def",
+    } as any);
+
+    // updateAgent returns the agent with credentials merged
+    const updatedAgent = makeAgent({
+      id: "linear-agent",
+      name: "Linear Agent",
+      triggers: {
+        linear: {
+          enabled: true,
+          oauthClientId: "client-id-123",
+          oauthClientSecret: "client-secret-456",
+          webhookSecret: "webhook-secret-789",
+          accessToken: "access-token-abc",
+          refreshToken: "refresh-token-def",
+        },
+      },
+    });
+    vi.mocked(agentStore.updateAgent).mockReturnValue(updatedAgent);
 
     const res = await app.request("/api/agents", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ name: "New Agent", prompt: "Hello" }),
+      body: JSON.stringify({
+        name: "Linear Agent",
+        prompt: "Handle linear issues",
+        triggers: { linear: { enabled: true } },
+      }),
     });
 
     expect(res.status).toBe(201);
-    expect(chatBot.reloadAgent).toHaveBeenCalledWith("new-agent");
-    expect(chatBot.reloadAgent).toHaveBeenCalledTimes(1);
-  });
+    const json = await res.json();
 
-  it("PUT /agents/:id calls chatBot.reloadAgent with the updated agent's ID", async () => {
-    const updated = makeAgent({ id: "test-agent", name: "Updated Name" });
-    vi.mocked(agentStore.updateAgent).mockReturnValue(updated);
-
-    const res = await app.request("/api/agents/test-agent", {
-      method: "PUT",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ name: "Updated Name" }),
+    // updateAgent should have been called to copy credentials to the agent
+    expect(agentStore.updateAgent).toHaveBeenCalledWith("linear-agent", {
+      triggers: {
+        linear: {
+          enabled: true,
+          oauthClientId: "client-id-123",
+          oauthClientSecret: "client-secret-456",
+          webhookSecret: "webhook-secret-789",
+          accessToken: "access-token-abc",
+          refreshToken: "refresh-token-def",
+        },
+      },
     });
 
-    expect(res.status).toBe(200);
-    // reloadAgent should be called with the (unchanged) agent ID
-    expect(chatBot.reloadAgent).toHaveBeenCalledWith("test-agent");
-    expect(chatBot.reloadAgent).toHaveBeenCalledTimes(1);
-    // removeAgent should NOT be called when the ID hasn't changed
-    expect(chatBot.removeAgent).not.toHaveBeenCalled();
-  });
-
-  it("PUT /agents/:id with name change calls chatBot.removeAgent(oldId) then chatBot.reloadAgent(newId)", async () => {
-    // When an agent is renamed, its ID changes (derived from the name slug).
-    // The route should remove the old ID from the chatBot and reload the new one.
-    const updated = makeAgent({ id: "renamed-agent", name: "Renamed Agent" });
-    vi.mocked(agentStore.updateAgent).mockReturnValue(updated);
-
-    const res = await app.request("/api/agents/original-agent", {
-      method: "PUT",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ name: "Renamed Agent" }),
+    // Global settings should have been cleared after staging
+    expect(updateSettings).toHaveBeenCalledWith({
+      linearOAuthClientId: "",
+      linearOAuthClientSecret: "",
+      linearOAuthWebhookSecret: "",
+      linearOAuthAccessToken: "",
+      linearOAuthRefreshToken: "",
     });
 
-    expect(res.status).toBe(200);
-    // removeAgent should be called with the OLD id since the id changed
-    expect(chatBot.removeAgent).toHaveBeenCalledWith("original-agent");
-    // reloadAgent should be called with the NEW id
-    expect(chatBot.reloadAgent).toHaveBeenCalledWith("renamed-agent");
+    // The response should have the sanitized agent (secrets stripped, boolean flags present)
+    expect(json).not.toHaveProperty("triggers.linear.oauthClientSecret");
+    expect(json).not.toHaveProperty("triggers.linear.accessToken");
+    expect(json).not.toHaveProperty("triggers.linear.refreshToken");
+    expect(json).not.toHaveProperty("triggers.linear.webhookSecret");
+    expect(json.triggers.linear.hasAccessToken).toBe(true);
+    expect(json.triggers.linear.hasClientSecret).toBe(true);
+    expect(json.triggers.linear.hasWebhookSecret).toBe(true);
   });
 
-  it("DELETE /agents/:id calls chatBot.removeAgent with the agent ID", async () => {
-    vi.mocked(agentStore.deleteAgent).mockReturnValue(true);
+  it("does not stage credentials when global settings have no linearOAuthClientId", async () => {
+    // When the global settings have no staged OAuth client ID, the normal creation
+    // flow should proceed without any credential copying or settings clearing.
+    const createdAgent = makeAgent({
+      id: "linear-agent-no-creds",
+      name: "Linear Agent No Creds",
+      triggers: {
+        linear: { enabled: true },
+      },
+    });
+    vi.mocked(agentStore.createAgent).mockReturnValue(createdAgent);
 
-    const res = await app.request("/api/agents/doomed-agent", { method: "DELETE" });
+    // Global settings have no staged credentials (empty strings)
+    vi.mocked(getSettings).mockReturnValue({
+      linearOAuthClientId: "",
+      linearOAuthClientSecret: "",
+      linearOAuthWebhookSecret: "",
+      linearOAuthAccessToken: "",
+      linearOAuthRefreshToken: "",
+    } as any);
 
-    expect(res.status).toBe(200);
-    expect(chatBot.removeAgent).toHaveBeenCalledWith("doomed-agent");
-    expect(chatBot.removeAgent).toHaveBeenCalledTimes(1);
+    const res = await app.request("/api/agents", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        name: "Linear Agent No Creds",
+        prompt: "Handle linear issues",
+        triggers: { linear: { enabled: true } },
+      }),
+    });
+
+    expect(res.status).toBe(201);
+    // updateAgent should NOT have been called for credential staging
+    expect(agentStore.updateAgent).not.toHaveBeenCalled();
+    // updateSettings should NOT have been called to clear staging creds
+    expect(updateSettings).not.toHaveBeenCalled();
   });
 
-  it("POST /agents/:id/toggle calls chatBot.reloadAgent with the agent ID", async () => {
-    const agent = makeAgent({ id: "toggle-agent", enabled: true });
-    const toggled = makeAgent({ id: "toggle-agent", enabled: false });
-    vi.mocked(agentStore.getAgent).mockReturnValue(agent);
-    vi.mocked(agentStore.updateAgent).mockReturnValue(toggled);
+  it("does NOT clear global settings when updateAgent fails during credential staging", async () => {
+    // If updateAgent returns null (store failure), the global OAuth credentials
+    // must NOT be cleared — otherwise the user's credentials are silently lost.
+    const createdAgent = makeAgent({
+      id: "linear-fail",
+      name: "Linear Fail",
+      triggers: {
+        linear: { enabled: true },
+      },
+    });
+    vi.mocked(agentStore.createAgent).mockReturnValue(createdAgent);
 
-    const res = await app.request("/api/agents/toggle-agent/toggle", { method: "POST" });
+    vi.mocked(getSettings).mockReturnValue({
+      linearOAuthClientId: "client-id-staged",
+      linearOAuthClientSecret: "secret-staged",
+      linearOAuthWebhookSecret: "webhook-staged",
+      linearOAuthAccessToken: "access-staged",
+      linearOAuthRefreshToken: "refresh-staged",
+    } as any);
 
-    expect(res.status).toBe(200);
-    expect(chatBot.reloadAgent).toHaveBeenCalledWith("toggle-agent");
-    expect(chatBot.reloadAgent).toHaveBeenCalledTimes(1);
+    // Simulate updateAgent failure (returns null)
+    vi.mocked(agentStore.updateAgent).mockReturnValue(null);
+
+    const res = await app.request("/api/agents", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        name: "Linear Fail",
+        prompt: "Handle linear issues",
+        triggers: { linear: { enabled: true } },
+      }),
+    });
+
+    expect(res.status).toBe(201);
+    // updateAgent was called (to try to copy creds) but returned null
+    expect(agentStore.updateAgent).toHaveBeenCalled();
+    // updateSettings must NOT have been called — creds are preserved for retry
+    expect(updateSettings).not.toHaveBeenCalled();
   });
 });
 
-// ─── Response sanitization ──────────────────────────────────────────────────
-// These tests verify that API responses pass agents through
-// sanitizeAgentForResponse (to strip sensitive fields) and that the export
-// endpoint uses stripChatCredentials to remove credentials entirely.
+// ─── GET /api/executions ────────────────────────────────────────────────────
 
-describe("response sanitization", () => {
-  it("GET /agents calls sanitizeAgentForResponse for each agent in the list", async () => {
-    const agents = [
-      makeAgent({ id: "agent-1", name: "Agent 1" }),
-      makeAgent({ id: "agent-2", name: "Agent 2" }),
-    ];
-    vi.mocked(agentStore.listAgents).mockReturnValue(agents);
+describe("GET /api/executions", () => {
+  it("passes query parameters as filters to agentExecutor.listAllExecutions", async () => {
+    // The /executions endpoint parses agentId, triggerType, status, limit, offset
+    // from query params and passes them to the executor's listAllExecutions method.
+    const mockResult = {
+      executions: [{ sessionId: "s1", agentId: "a1", triggerType: "manual", startedAt: 100 }],
+      total: 1,
+    };
+    executor.listAllExecutions.mockReturnValue(mockResult);
 
-    const res = await app.request("/api/agents");
+    const res = await app.request(
+      "/api/executions?agentId=a1&triggerType=manual&status=success&limit=10&offset=5",
+    );
 
     expect(res.status).toBe(200);
-    // sanitizeAgentForResponse should be called once per agent in the list
-    expect(agentStore.sanitizeAgentForResponse).toHaveBeenCalledTimes(2);
-    expect(agentStore.sanitizeAgentForResponse).toHaveBeenCalledWith(agents[0]);
-    expect(agentStore.sanitizeAgentForResponse).toHaveBeenCalledWith(agents[1]);
+    const json = await res.json();
+    expect(json).toEqual(mockResult);
+    expect(executor.listAllExecutions).toHaveBeenCalledWith({
+      agentId: "a1",
+      triggerType: "manual",
+      status: "success",
+      limit: 10,
+      offset: 5,
+    });
   });
 
-  it("GET /agents/:id calls sanitizeAgentForResponse on the returned agent", async () => {
-    const agent = makeAgent({ id: "single-agent" });
-    vi.mocked(agentStore.getAgent).mockReturnValue(agent);
+  it("uses default limit and offset when not provided, and ignores invalid status", async () => {
+    // When no limit/offset are provided, defaults should be limit=50 and offset=0.
+    // An invalid status value (not "running", "success", or "error") should be undefined.
+    executor.listAllExecutions.mockReturnValue({ executions: [], total: 0 });
 
-    const res = await app.request("/api/agents/single-agent");
+    const res = await app.request("/api/executions?status=invalid");
 
     expect(res.status).toBe(200);
-    expect(agentStore.sanitizeAgentForResponse).toHaveBeenCalledTimes(1);
-    expect(agentStore.sanitizeAgentForResponse).toHaveBeenCalledWith(agent);
+    expect(executor.listAllExecutions).toHaveBeenCalledWith({
+      agentId: undefined,
+      triggerType: undefined,
+      status: undefined,
+      limit: 50,
+      offset: 0,
+    });
   });
 
-  it("GET /agents/:id/export calls stripChatCredentials via the toExport function", async () => {
-    const agent = makeAgent({ id: "export-agent", name: "Export Agent" });
-    vi.mocked(agentStore.getAgent).mockReturnValue(agent);
+  it("clamps limit to the range [1, 500]", async () => {
+    // Limit is computed as Math.min(Math.max(Number(query) || 50, 1), 500).
+    // Values above 500 are clamped down; 0 and NaN fall back to 50 via the || operator.
+    executor.listAllExecutions.mockReturnValue({ executions: [], total: 0 });
 
-    const res = await app.request("/api/agents/export-agent/export");
+    // Test upper bound: 9999 should become 500
+    await app.request("/api/executions?limit=9999");
+    expect(executor.listAllExecutions).toHaveBeenCalledWith(
+      expect.objectContaining({ limit: 500 }),
+    );
+
+    executor.listAllExecutions.mockClear();
+
+    // Test that 0 is treated as falsy and defaults to 50 (via || 50)
+    await app.request("/api/executions?limit=0");
+    expect(executor.listAllExecutions).toHaveBeenCalledWith(
+      expect.objectContaining({ limit: 50 }),
+    );
+
+    executor.listAllExecutions.mockClear();
+
+    // Test that a non-numeric value defaults to 50
+    await app.request("/api/executions?limit=abc");
+    expect(executor.listAllExecutions).toHaveBeenCalledWith(
+      expect.objectContaining({ limit: 50 }),
+    );
+  });
+
+  it("returns empty result when no executor is available", async () => {
+    // If agentExecutor is undefined, the route should return a fallback empty result.
+    // We test this by creating a separate app with no executor.
+    const appNoExecutor = new Hono();
+    const apiNoExecutor = new Hono();
+    registerAgentRoutes(apiNoExecutor, undefined);
+    appNoExecutor.route("/api", apiNoExecutor);
+
+    const res = await appNoExecutor.request("/api/executions");
 
     expect(res.status).toBe(200);
-    // The toExport function internally calls stripChatCredentials before
-    // stripping internal tracking fields, so the mock should have been invoked.
-    expect(agentStore.stripChatCredentials).toHaveBeenCalledTimes(1);
-    expect(agentStore.stripChatCredentials).toHaveBeenCalledWith(agent);
+    const json = await res.json();
+    expect(json).toEqual({ executions: [], total: 0 });
   });
 });
+
+// ─── POST /api/agents/:id/regenerate-secret ─────────────────────────────────
+
+describe("POST /api/agents/:id/regenerate-secret", () => {
+  it("regenerates the webhook secret and returns the sanitized agent", async () => {
+    // The regenerate-secret endpoint calls agentStore.regenerateWebhookSecret
+    // and returns the agent with sensitive Linear fields stripped.
+    const agentWithNewSecret = makeAgent({
+      id: "regen-agent",
+      triggers: {
+        webhook: { enabled: true, secret: "new-secret-xyz" },
+        linear: {
+          enabled: true,
+          oauthClientId: "cid",
+          oauthClientSecret: "csecret",
+          webhookSecret: "ws",
+          accessToken: "at",
+          refreshToken: "rt",
+        },
+      },
+    });
+    vi.mocked(agentStore.regenerateWebhookSecret).mockReturnValue(agentWithNewSecret);
+
+    const res = await app.request("/api/agents/regen-agent/regenerate-secret", {
+      method: "POST",
+    });
+
+    expect(res.status).toBe(200);
+    expect(agentStore.regenerateWebhookSecret).toHaveBeenCalledWith("regen-agent");
+    const json = await res.json();
+    expect(json.id).toBe("regen-agent");
+    // Sanitize should strip Linear OAuth secrets and add boolean flags
+    expect(json.triggers.linear.hasAccessToken).toBe(true);
+    expect(json.triggers.linear.hasClientSecret).toBe(true);
+    expect(json.triggers.linear.hasWebhookSecret).toBe(true);
+    expect(json.triggers.linear).not.toHaveProperty("oauthClientSecret");
+    expect(json.triggers.linear).not.toHaveProperty("accessToken");
+    expect(json.triggers.linear).not.toHaveProperty("refreshToken");
+    expect(json.triggers.linear).not.toHaveProperty("webhookSecret");
+  });
+
+  it("returns 404 when agent does not exist", async () => {
+    vi.mocked(agentStore.regenerateWebhookSecret).mockReturnValue(null);
+
+    const res = await app.request("/api/agents/nonexistent/regenerate-secret", {
+      method: "POST",
+    });
+
+    expect(res.status).toBe(404);
+    const json = await res.json();
+    expect(json.error).toBe("Agent not found");
+  });
+});
+

@@ -1,3 +1,13 @@
 $ NODE_ENV=production bun server/index.ts
 $ NODE_ENV=production bun server/index.ts
 $ NODE_ENV=production bun server/index.ts
+$ NODE_ENV=production bun server/index.ts
+$ NODE_ENV=production bun server/index.ts
+$ NODE_ENV=production bun server/index.ts
+$ NODE_ENV=production bun server/index.ts
+$ NODE_ENV=production bun server/index.ts
+$ NODE_ENV=production bun server/index.ts
+error: script "start" was terminated by signal SIGHUP (Terminal hung up)
+error: script "start" was terminated by signal SIGHUP (Terminal hung up)
+$ NODE_ENV=production bun server/index.ts
+error: script "start" was terminated by signal SIGTERM (Polite quit request)
