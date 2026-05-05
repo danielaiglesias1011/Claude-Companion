@@ -178,10 +178,10 @@ export function SessionItem({
             onStartRename(s.id, label);
           }
         }}
-        className={`w-full flex items-center gap-2 py-2 pl-2.5 pr-12 min-h-[44px] rounded-lg transition-all duration-100 cursor-pointer relative ${
+        className={`w-full flex items-center gap-2 py-2 pl-2.5 pr-12 min-h-[44px] rounded-xl transition-all duration-150 cursor-pointer relative border ${
           isActive
-            ? "bg-cc-active"
-            : "hover:bg-cc-hover"
+            ? "bg-cc-active border-[rgba(255,79,163,0.25)] shadow-[0_0_12px_rgba(255,79,163,0.1)]"
+            : "border-transparent hover:bg-cc-hover hover:border-white/[0.07]"
         }`}
       >
         {/* Left accent edge for active state */}

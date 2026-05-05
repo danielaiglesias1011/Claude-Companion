@@ -197,8 +197,37 @@ function EditToolDetail({ input }: { input: Record<string, unknown> }) {
 function WriteToolDetail({ input }: { input: Record<string, unknown> }) {
   const filePath = String(input.file_path || "");
   const content = String(input.content || "");
+  const fileName = filePath.split("/").pop() || "file";
 
-  return <DiffViewer newText={content} fileName={filePath} mode="compact" />;
+  function handleDownload() {
+    const blob = new Blob([content], { type: "text/plain" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = fileName;
+    a.click();
+    URL.revokeObjectURL(url);
+  }
+
+  return (
+    <div className="space-y-2">
+      <div className="flex items-center justify-between">
+        <span className="text-xs text-cc-muted font-mono-code truncate">{filePath}</span>
+        <button
+          onClick={handleDownload}
+          aria-label={`Download ${fileName}`}
+          className="flex items-center gap-1 text-xs text-cc-muted hover:text-cc-fg transition-colors shrink-0 ml-2 px-1.5 py-0.5 rounded hover:bg-cc-hover"
+          title={`Download ${fileName}`}
+        >
+          <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5" className="w-3 h-3" aria-hidden="true">
+            <path d="M8 2v8M5 7l3 3 3-3M2 12v1a1 1 0 001 1h10a1 1 0 001-1v-1" strokeLinecap="round" strokeLinejoin="round" />
+          </svg>
+          Download
+        </button>
+      </div>
+      <DiffViewer newText={content} fileName={filePath} mode="compact" />
+    </div>
+  );
 }
 
 function ReadToolDetail({ input }: { input: Record<string, unknown> }) {

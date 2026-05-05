@@ -385,7 +385,7 @@ export function LinearSection({
                     ? "border-cc-primary/35 bg-cc-primary/10 text-cc-primary"
                     : linearConfigured
                       ? "border-cc-border bg-cc-hover/70 text-cc-fg hover:bg-cc-hover"
-                      : "border-amber-500/25 bg-amber-500/10 text-amber-600 dark:text-amber-300"
+                      : "border-pink-500/25 bg-pink-500/10 text-pink-600 dark:text-pink-300"
                 }`}
               >
                 <LinearLogo className="w-3.5 h-3.5" />
@@ -421,7 +421,7 @@ export function LinearSection({
               )}
 
               {!linearConfigured && (
-                <span className="text-[11px] text-amber-600 dark:text-amber-300">
+                <span className="text-[11px] text-pink-600 dark:text-pink-300">
                   Configure Linear to attach an issue.
                 </span>
               )}
@@ -653,8 +653,8 @@ export function LinearSection({
       </div>
 
       {showLinearStartWarning && (
-        <div className="p-3 rounded-[10px] bg-amber-500/10 border border-amber-500/20">
-          <p className="text-xs text-amber-700 dark:text-amber-300 leading-snug">
+        <div className="p-3 rounded-[10px] bg-pink-500/10 border border-pink-500/20">
+          <p className="text-xs text-pink-700 dark:text-pink-300 leading-snug">
             Warning: Linear is not configured. Continue anyway?
           </p>
           <div className="flex gap-2 mt-2.5">

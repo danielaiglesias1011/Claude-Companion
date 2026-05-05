@@ -593,7 +593,7 @@ export function SessionEditorPane({ sessionId }: SessionEditorPaneProps) {
           </button>
           <div className="min-w-0">
             <p className="text-[11px] text-cc-muted truncate">{relPath(cwd, selectedPath)}</p>
-            {dirty && <p className="text-[10px] text-amber-500">Unsaved changes</p>}
+            {dirty && <p className="text-[10px] text-pink-500">Unsaved changes</p>}
             {saved && <p className="text-[10px] text-cc-success">Saved</p>}
           </div>
         </div>

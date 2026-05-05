@@ -90,7 +90,7 @@ export function TailscalePage({ embedded = false }: TailscalePageProps) {
       ? "text-cc-muted"
       : status.funnelActive
         ? "text-cc-success"
-        : "text-amber-500";
+        : "text-pink-500";
 
   return (
     <div className={`${embedded ? "h-full" : "h-[100dvh]"} bg-cc-bg text-cc-fg font-sans-ui antialiased overflow-y-auto`}>
@@ -225,8 +225,8 @@ export function TailscalePage({ embedded = false }: TailscalePageProps) {
               </p>
 
               {status.needsOperatorMode && !status.error && (
-                <div className="space-y-2 px-3 py-3 rounded-lg bg-amber-500/10 border border-amber-500/20">
-                  <p className="text-xs text-amber-500 font-medium">
+                <div className="space-y-2 px-3 py-3 rounded-lg bg-pink-500/10 border border-pink-500/20">
+                  <p className="text-xs text-pink-500 font-medium">
                     Setup needed: Tailscale operator mode
                   </p>
                   <p className="text-xs text-cc-muted">
@@ -295,8 +295,8 @@ export function TailscalePage({ embedded = false }: TailscalePageProps) {
 
           {/* Structured permission error panel */}
           {status?.error && status.needsOperatorMode && (
-            <div className="space-y-3 px-3 py-3 rounded-lg bg-amber-500/10 border border-amber-500/20">
-              <p className="text-sm font-medium text-amber-500">
+            <div className="space-y-3 px-3 py-3 rounded-lg bg-pink-500/10 border border-pink-500/20">
+              <p className="text-sm font-medium text-pink-500">
                 Operator mode required
               </p>
               <p className="text-xs text-cc-muted">
@@ -326,8 +326,8 @@ export function TailscalePage({ embedded = false }: TailscalePageProps) {
 
           {/* DNS / reachability warning (non-blocking — funnel is active) */}
           {status?.warning && (
-            <div className="space-y-2 px-3 py-3 rounded-lg bg-amber-500/10 border border-amber-500/20">
-              <p className="text-sm font-medium text-amber-500">
+            <div className="space-y-2 px-3 py-3 rounded-lg bg-pink-500/10 border border-pink-500/20">
+              <p className="text-sm font-medium text-pink-500">
                 URL may not be publicly accessible
               </p>
               <p className="text-xs text-cc-muted">

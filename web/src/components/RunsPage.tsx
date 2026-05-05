@@ -23,7 +23,7 @@ function triggerColor(type: string): string {
   switch (type) {
     case "manual": return "bg-blue-500/10 text-blue-600 dark:text-blue-400";
     case "webhook": return "bg-purple-500/10 text-purple-600 dark:text-purple-400";
-    case "schedule": return "bg-amber-500/10 text-amber-600 dark:text-amber-400";
+    case "schedule": return "bg-pink-500/10 text-pink-600 dark:text-pink-400";
     case "linear": return "bg-violet-500/10 text-violet-600 dark:text-violet-400";
     default: return "bg-cc-hover text-cc-muted";
   }

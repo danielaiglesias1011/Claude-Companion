@@ -87,21 +87,21 @@ function PanelSection({
   }, []);
 
   return (
-    <div className="border-t border-cc-separator first:border-t-0">
+    <div className="border-t border-white/[0.06] first:border-t-0">
       <button
         onClick={toggle}
         aria-expanded={!collapsed}
-        className="w-full flex items-center gap-1.5 px-4 py-2 text-left hover:bg-cc-hover/50 transition-colors cursor-pointer"
+        className="w-full flex items-center gap-1.5 px-4 py-2 text-left hover:bg-white/[0.03] transition-colors cursor-pointer"
       >
         <svg
           viewBox="0 0 16 16"
           fill="currentColor"
           aria-hidden
-          className={`w-2.5 h-2.5 text-cc-muted/60 shrink-0 transition-transform duration-150 ${collapsed ? "" : "rotate-90"}`}
+          className={`w-2.5 h-2.5 text-[#9ba3b4]/60 shrink-0 transition-transform duration-150 ${collapsed ? "" : "rotate-90"}`}
         >
           <path d="M6 4l4 4-4 4" />
         </svg>
-        <span className="text-[11px] font-semibold text-cc-muted uppercase tracking-wider flex-1 truncate">
+        <span className="text-[11px] font-semibold text-[#9ba3b4] uppercase tracking-wider flex-1 truncate">
           {label}
         </span>
         {badge && <span className="shrink-0">{badge}</span>}
@@ -121,9 +121,9 @@ function PanelSection({
 // ─── Shared progress meter ──────────────────────────────────────────────────
 
 function barColor(pct: number): string {
-  if (pct > 80) return "bg-cc-error";
-  if (pct > 50) return "bg-cc-warning";
-  return "bg-cc-primary";
+  if (pct > 80) return "bg-[#ff6b6b] shadow-[0_0_8px_rgba(255,107,107,0.5)]";
+  if (pct > 50) return "bg-yellow-400 shadow-[0_0_8px_rgba(251,191,36,0.4)]";
+  return "bg-[#ff4fa3] shadow-[0_0_8px_rgba(255,79,163,0.4)]";
 }
 
 function barLevel(pct: number): string {
@@ -136,10 +136,10 @@ function ProgressMeter({ label, pct, detail }: { label: string; pct: number; det
   return (
     <div className="space-y-1">
       <div className="flex items-center justify-between">
-        <span className="text-[11px] text-cc-muted uppercase tracking-wider">{label}</span>
-        <span className="text-[11px] text-cc-muted tabular-nums">
+        <span className="text-[11px] text-[#9ba3b4] uppercase tracking-wider">{label}</span>
+        <span className="text-[11px] text-[#9ba3b4] tabular-nums">
           {Math.round(pct)}%
-          {detail && <span className="ml-1 text-cc-muted">({detail})</span>}
+          {detail && <span className="ml-1 text-[#9ba3b4]">({detail})</span>}
         </span>
       </div>
       <div
@@ -148,7 +148,7 @@ function ProgressMeter({ label, pct, detail }: { label: string; pct: number; det
         aria-valuenow={Math.round(pct)}
         aria-valuemin={0}
         aria-valuemax={100}
-        className="w-full h-1.5 rounded-full bg-cc-hover overflow-hidden"
+        className="w-full h-1 rounded-full bg-white/[0.08] overflow-hidden"
       >
         <div
           className={`h-full rounded-full transition-all duration-500 ${barColor(pct)}`}
@@ -214,8 +214,8 @@ function UsageLimitsSection({ sessionId }: { sessionId: string }) {
       {hasExtra && limits.extra_usage && (
         <div className="space-y-1">
           <div className="flex items-center justify-between">
-            <span className="text-[11px] text-cc-muted uppercase tracking-wider">Extra</span>
-            <span className="text-[11px] text-cc-muted tabular-nums">
+            <span className="text-[11px] text-[#9ba3b4] uppercase tracking-wider">Extra</span>
+            <span className="text-[11px] text-[#9ba3b4] tabular-nums">
               ${limits.extra_usage.used_credits.toFixed(2)} / ${limits.extra_usage.monthly_limit}
             </span>
           </div>
@@ -226,7 +226,7 @@ function UsageLimitsSection({ sessionId }: { sessionId: string }) {
               aria-valuenow={Math.round(limits.extra_usage.utilization)}
               aria-valuemin={0}
               aria-valuemax={100}
-              className="w-full h-1.5 rounded-full bg-cc-hover overflow-hidden"
+              className="w-full h-1.5 rounded-full bg-white/[0.08] overflow-hidden"
             >
               <div
                 className={`h-full rounded-full transition-all duration-500 ${barColor(limits.extra_usage.utilization)}`}
@@ -286,26 +286,26 @@ function CodexTokenDetailsSection({ sessionId }: { sessionId: string }) {
 
   return (
     <div className="shrink-0 px-4 py-2.5 space-y-2">
-      <span className="text-[11px] text-cc-muted uppercase tracking-wider">Tokens</span>
+      <span className="text-[11px] text-[#9ba3b4] uppercase tracking-wider">Tokens</span>
       <div className="grid grid-cols-2 gap-x-3 gap-y-1">
         <div className="flex items-center justify-between">
-          <span className="text-[11px] text-cc-muted">Input</span>
-          <span className="text-[11px] text-cc-fg tabular-nums font-medium">{formatTokenCount(details.inputTokens)}</span>
+          <span className="text-[11px] text-[#9ba3b4]">Input</span>
+          <span className="text-[11px] text-[#f6f7fb] tabular-nums font-medium">{formatTokenCount(details.inputTokens)}</span>
         </div>
         <div className="flex items-center justify-between">
-          <span className="text-[11px] text-cc-muted">Output</span>
-          <span className="text-[11px] text-cc-fg tabular-nums font-medium">{formatTokenCount(details.outputTokens)}</span>
+          <span className="text-[11px] text-[#9ba3b4]">Output</span>
+          <span className="text-[11px] text-[#f6f7fb] tabular-nums font-medium">{formatTokenCount(details.outputTokens)}</span>
         </div>
         {details.cachedInputTokens > 0 && (
           <div className="flex items-center justify-between">
-            <span className="text-[11px] text-cc-muted">Cached</span>
-            <span className="text-[11px] text-cc-fg tabular-nums font-medium">{formatTokenCount(details.cachedInputTokens)}</span>
+            <span className="text-[11px] text-[#9ba3b4]">Cached</span>
+            <span className="text-[11px] text-[#f6f7fb] tabular-nums font-medium">{formatTokenCount(details.cachedInputTokens)}</span>
           </div>
         )}
         {details.reasoningOutputTokens > 0 && (
           <div className="flex items-center justify-between">
-            <span className="text-[11px] text-cc-muted">Reasoning</span>
-            <span className="text-[11px] text-cc-fg tabular-nums font-medium">{formatTokenCount(details.reasoningOutputTokens)}</span>
+            <span className="text-[11px] text-[#9ba3b4]">Reasoning</span>
+            <span className="text-[11px] text-[#f6f7fb] tabular-nums font-medium">{formatTokenCount(details.reasoningOutputTokens)}</span>
           </div>
         )}
       </div>
@@ -319,11 +319,11 @@ function CodexTokenDetailsSection({ sessionId }: { sessionId: string }) {
 // ─── GitHub PR Status ───────────────────────────────────────────────────────
 
 function prStatePill(state: GitHubPRInfo["state"], isDraft: boolean) {
-  if (isDraft) return { label: "Draft", cls: "text-cc-muted bg-cc-hover" };
+  if (isDraft) return { label: "Draft", cls: "text-[#9ba3b4] bg-white/[0.06]" };
   switch (state) {
-    case "OPEN": return { label: "Open", cls: "text-cc-success bg-cc-success/10" };
-    case "MERGED": return { label: "Merged", cls: "text-cc-merged bg-cc-merged/10" };
-    case "CLOSED": return { label: "Closed", cls: "text-cc-error bg-cc-error/10" };
+    case "OPEN": return { label: "Open", cls: "text-emerald-400 bg-emerald-500/10" };
+    case "MERGED": return { label: "Merged", cls: "text-purple-400 bg-purple-500/10" };
+    case "CLOSED": return { label: "Closed", cls: "text-[#ff6b6b] bg-[#ff6b6b]/10" };
   }
 }
 
@@ -339,7 +339,7 @@ export function GitHubPRDisplay({ pr }: { pr: GitHubPRInfo }) {
           href={pr.url}
           target="_blank"
           rel="noopener noreferrer"
-          className="text-[12px] font-semibold text-cc-fg hover:text-cc-primary transition-colors"
+          className="text-[12px] font-semibold text-[#f6f7fb] hover:text-[#ff4fa3] transition-colors"
         >
           PR #{pr.number}
         </a>
@@ -349,7 +349,7 @@ export function GitHubPRDisplay({ pr }: { pr: GitHubPRInfo }) {
       </div>
 
       {/* Title */}
-      <p className="text-[11px] text-cc-muted truncate" title={pr.title}>
+      <p className="text-[11px] text-[#9ba3b4] truncate" title={pr.title}>
         {pr.title}
       </p>
 
@@ -358,14 +358,14 @@ export function GitHubPRDisplay({ pr }: { pr: GitHubPRInfo }) {
         <div className="flex items-center gap-2 text-[11px]" aria-label={`CI checks: ${cs.success} passed, ${cs.failure} failing, ${cs.pending} pending`}>
           {cs.failure > 0 ? (
             <>
-              <span className="flex items-center gap-1 text-cc-error">
+              <span className="flex items-center gap-1 text-[#ff6b6b]">
                 <svg viewBox="0 0 16 16" fill="currentColor" className="w-3 h-3">
                   <path d="M3.72 3.72a.75.75 0 011.06 0L8 6.94l3.22-3.22a.75.75 0 111.06 1.06L9.06 8l3.22 3.22a.75.75 0 11-1.06 1.06L8 9.06l-3.22 3.22a.75.75 0 01-1.06-1.06L6.94 8 3.72 4.78a.75.75 0 010-1.06z" />
                 </svg>
                 {cs.failure} failing
               </span>
               {cs.success > 0 && (
-                <span className="flex items-center gap-1 text-cc-success">
+                <span className="flex items-center gap-1 text-emerald-400">
                   <svg viewBox="0 0 16 16" fill="currentColor" className="w-3 h-3">
                     <path fillRule="evenodd" d="M13.78 4.22a.75.75 0 010 1.06l-7.25 7.25a.75.75 0 01-1.06 0L2.22 9.28a.75.75 0 011.06-1.06L6 10.94l6.72-6.72a.75.75 0 011.06 0z" clipRule="evenodd" />
                   </svg>
@@ -374,18 +374,18 @@ export function GitHubPRDisplay({ pr }: { pr: GitHubPRInfo }) {
               )}
             </>
           ) : cs.pending > 0 ? (
-            <span className="flex items-center gap-1 text-cc-warning">
+            <span className="flex items-center gap-1 text-yellow-400">
               <svg viewBox="0 0 16 16" fill="currentColor" className="w-3 h-3 animate-spin">
                 <path d="M8 2a6 6 0 100 12A6 6 0 008 2zM0 8a8 8 0 1116 0A8 8 0 010 8z" opacity=".2" />
                 <path d="M8 0a8 8 0 018 8h-2A6 6 0 008 2V0z" />
               </svg>
               {cs.pending} pending
               {cs.success > 0 && (
-                <span className="text-cc-success ml-1">{cs.success} passed</span>
+                <span className="text-emerald-400 ml-1">{cs.success} passed</span>
               )}
             </span>
           ) : (
-            <span className="flex items-center gap-1 text-cc-success">
+            <span className="flex items-center gap-1 text-emerald-400">
               <svg viewBox="0 0 16 16" fill="currentColor" className="w-3 h-3">
                 <path fillRule="evenodd" d="M13.78 4.22a.75.75 0 010 1.06l-7.25 7.25a.75.75 0 01-1.06 0L2.22 9.28a.75.75 0 011.06-1.06L6 10.94l6.72-6.72a.75.75 0 011.06 0z" clipRule="evenodd" />
               </svg>
@@ -398,7 +398,7 @@ export function GitHubPRDisplay({ pr }: { pr: GitHubPRInfo }) {
       {/* Review + unresolved comments */}
       <div className="flex items-center gap-2 text-[11px]">
         {pr.reviewDecision === "APPROVED" && (
-          <span className="flex items-center gap-1 text-cc-success">
+          <span className="flex items-center gap-1 text-emerald-400">
             <svg viewBox="0 0 16 16" fill="currentColor" className="w-3 h-3">
               <path fillRule="evenodd" d="M13.78 4.22a.75.75 0 010 1.06l-7.25 7.25a.75.75 0 01-1.06 0L2.22 9.28a.75.75 0 011.06-1.06L6 10.94l6.72-6.72a.75.75 0 011.06 0z" clipRule="evenodd" />
             </svg>
@@ -406,7 +406,7 @@ export function GitHubPRDisplay({ pr }: { pr: GitHubPRInfo }) {
           </span>
         )}
         {pr.reviewDecision === "CHANGES_REQUESTED" && (
-          <span className="flex items-center gap-1 text-cc-error">
+          <span className="flex items-center gap-1 text-[#ff6b6b]">
             <svg viewBox="0 0 16 16" fill="currentColor" className="w-3 h-3">
               <path fillRule="evenodd" d="M8 1.5a6.5 6.5 0 100 13 6.5 6.5 0 000-13zM0 8a8 8 0 1116 0A8 8 0 010 8zm9-3a1 1 0 11-2 0 1 1 0 012 0zM8 7a.75.75 0 01.75.75v3.5a.75.75 0 01-1.5 0v-3.5A.75.75 0 018 7z" clipRule="evenodd" />
             </svg>
@@ -414,7 +414,7 @@ export function GitHubPRDisplay({ pr }: { pr: GitHubPRInfo }) {
           </span>
         )}
         {(pr.reviewDecision === "REVIEW_REQUIRED" || pr.reviewDecision === null) && pr.state === "OPEN" && (
-          <span className="flex items-center gap-1 text-cc-muted">
+          <span className="flex items-center gap-1 text-[#9ba3b4]">
             <svg viewBox="0 0 16 16" fill="currentColor" className="w-3 h-3 opacity-50">
               <circle cx="8" cy="8" r="6" />
             </svg>
@@ -422,7 +422,7 @@ export function GitHubPRDisplay({ pr }: { pr: GitHubPRInfo }) {
           </span>
         )}
         {rt.unresolved > 0 && (
-          <span className="flex items-center gap-1 text-cc-warning">
+          <span className="flex items-center gap-1 text-yellow-400">
             <svg viewBox="0 0 16 16" fill="currentColor" className="w-3 h-3">
               <path d="M2.5 2A1.5 1.5 0 001 3.5v8A1.5 1.5 0 002.5 13h2v2.5l3.5-2.5h5.5a1.5 1.5 0 001.5-1.5v-8A1.5 1.5 0 0013.5 2h-11z" />
             </svg>
@@ -431,10 +431,10 @@ export function GitHubPRDisplay({ pr }: { pr: GitHubPRInfo }) {
         )}
       </div>
 
-      {/* Diff stats — using design tokens */}
-      <div className="flex items-center gap-1.5 text-[10px] text-cc-muted">
-        <span className="text-cc-success">+{pr.additions}</span>
-        <span className="text-cc-error">-{pr.deletions}</span>
+      {/* Diff stats */}
+      <div className="flex items-center gap-1.5 text-[10px] text-[#9ba3b4]">
+        <span className="text-emerald-400">+{pr.additions}</span>
+        <span className="text-[#ff6b6b]">-{pr.deletions}</span>
         <span>&middot; {pr.changedFiles} files</span>
       </div>
     </div>
@@ -468,17 +468,17 @@ const LINEAR_POLL_INTERVAL = 60_000;
 function linearStatePill(stateType: string, stateName: string) {
   switch (stateType) {
     case "completed":
-      return { label: stateName || "Done", cls: "text-cc-success bg-cc-success/10" };
+      return { label: stateName || "Done", cls: "text-emerald-400 bg-emerald-500/10" };
     case "cancelled":
-      return { label: stateName || "Cancelled", cls: "text-cc-muted bg-cc-hover" };
+      return { label: stateName || "Cancelled", cls: "text-[#9ba3b4] bg-white/[0.06]" };
     case "started":
-      return { label: stateName || "In Progress", cls: "text-cc-info bg-cc-info/10" };
+      return { label: stateName || "In Progress", cls: "text-sky-400 bg-sky-500/10" };
     case "unstarted":
-      return { label: stateName || "Todo", cls: "text-cc-muted bg-cc-hover" };
+      return { label: stateName || "Todo", cls: "text-[#9ba3b4] bg-white/[0.06]" };
     case "backlog":
-      return { label: stateName || "Backlog", cls: "text-cc-muted bg-cc-hover" };
+      return { label: stateName || "Backlog", cls: "text-[#9ba3b4] bg-white/[0.06]" };
     default:
-      return { label: stateName || stateType || "Unknown", cls: "text-cc-muted bg-cc-hover" };
+      return { label: stateName || stateType || "Unknown", cls: "text-[#9ba3b4] bg-white/[0.06]" };
   }
 }
 
@@ -599,7 +599,7 @@ function LinearIssueSection({ sessionId }: { sessionId: string }) {
         {!showSearch ? (
           <button
             onClick={() => setShowSearch(true)}
-            className="flex items-center gap-1.5 text-[11px] text-cc-muted hover:text-cc-fg transition-colors cursor-pointer"
+            className="flex items-center gap-1.5 text-[11px] text-[#9ba3b4] hover:text-white transition-colors cursor-pointer"
           >
             <LinearLogo className="w-3.5 h-3.5" />
             Link Linear issue
@@ -607,7 +607,7 @@ function LinearIssueSection({ sessionId }: { sessionId: string }) {
         ) : (
           <div className="space-y-2">
             <div className="flex items-center gap-1.5">
-              <LinearLogo className="w-3.5 h-3.5 text-cc-muted shrink-0" />
+              <LinearLogo className="w-3.5 h-3.5 text-[#9ba3b4] shrink-0" />
               <input
                 ref={searchInputRef}
                 type="text"
@@ -615,12 +615,12 @@ function LinearIssueSection({ sessionId }: { sessionId: string }) {
                 onChange={(e) => setSearchQuery(e.target.value)}
                 placeholder="Search issues..."
                 aria-label="Search Linear issues"
-                className="flex-1 text-[11px] bg-transparent border border-cc-border rounded-md px-2 py-1.5 text-cc-fg placeholder:text-cc-muted focus:outline-none focus:border-cc-primary/50"
+                className="flex-1 text-[11px] bg-transparent border border-white/[0.1] rounded-md px-2 py-1.5 text-[#f6f7fb] placeholder:text-[#9ba3b4]/70 focus:outline-none focus:border-[rgba(255,79,163,0.5)]"
               />
               <button
                 onClick={() => { setShowSearch(false); setSearchQuery(""); setSearchResults([]); }}
                 aria-label="Close search"
-                className="w-7 h-7 flex items-center justify-center rounded-md text-cc-muted hover:text-cc-fg hover:bg-cc-hover transition-colors cursor-pointer"
+                className="w-7 h-7 flex items-center justify-center rounded-md text-[#9ba3b4] hover:text-white hover:bg-white/[0.06] transition-colors cursor-pointer"
               >
                 <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5" className="w-3.5 h-3.5">
                   <path d="M4 4l8 8M12 4l-8 8" />
@@ -628,7 +628,7 @@ function LinearIssueSection({ sessionId }: { sessionId: string }) {
               </button>
             </div>
             {searching && (
-              <p className="text-[10px] text-cc-muted">Searching...</p>
+              <p className="text-[10px] text-[#9ba3b4]">Searching...</p>
             )}
             {searchResults.length > 0 && (
               <div className="space-y-0.5 max-h-48 overflow-y-auto">
@@ -636,21 +636,21 @@ function LinearIssueSection({ sessionId }: { sessionId: string }) {
                   <button
                     key={issue.id}
                     onClick={() => handleLinkIssue(issue)}
-                    className="w-full text-left px-2 py-1.5 rounded-md hover:bg-cc-hover transition-colors cursor-pointer"
+                    className="w-full text-left px-2 py-1.5 rounded-md hover:bg-white/[0.06] transition-colors cursor-pointer"
                   >
                     <div className="flex items-center gap-1.5">
-                      <span className="text-[11px] font-mono-code text-cc-primary shrink-0">{issue.identifier}</span>
+                      <span className="text-[11px] font-mono-code text-[#ff4fa3] shrink-0">{issue.identifier}</span>
                       <span className={`text-[9px] font-medium px-1 rounded-full leading-[14px] ${linearStatePill(issue.stateType, issue.stateName).cls}`}>
                         {linearStatePill(issue.stateType, issue.stateName).label}
                       </span>
                     </div>
-                    <p className="text-[11px] text-cc-muted truncate mt-0.5">{issue.title}</p>
+                    <p className="text-[11px] text-[#9ba3b4] truncate mt-0.5">{issue.title}</p>
                   </button>
                 ))}
               </div>
             )}
             {searchQuery.trim().length >= 2 && !searching && searchResults.length === 0 && (
-              <p className="text-[10px] text-cc-muted text-center py-2">No issues found</p>
+              <p className="text-[10px] text-[#9ba3b4] text-center py-2">No issues found</p>
             )}
           </div>
         )}
@@ -665,12 +665,12 @@ function LinearIssueSection({ sessionId }: { sessionId: string }) {
       {/* Header: identifier + state pill + unlink */}
       <div className="px-4 py-2.5 space-y-1.5">
         <div className="flex items-center gap-1.5">
-          <LinearLogo className="w-3.5 h-3.5 text-cc-muted shrink-0" />
+          <LinearLogo className="w-3.5 h-3.5 text-[#9ba3b4] shrink-0" />
           <a
             href={linkedIssue.url}
             target="_blank"
             rel="noopener noreferrer"
-            className="text-[12px] font-semibold text-cc-fg hover:text-cc-primary transition-colors font-mono-code"
+            className="text-[12px] font-semibold text-[#f6f7fb] hover:text-[#ff4fa3] transition-colors font-mono-code"
           >
             {linkedIssue.identifier}
           </a>
@@ -679,7 +679,7 @@ function LinearIssueSection({ sessionId }: { sessionId: string }) {
           </span>
           <button
             onClick={handleUnlink}
-            className="ml-auto flex items-center justify-center w-7 h-7 rounded-md text-cc-muted hover:text-cc-fg hover:bg-cc-hover transition-colors cursor-pointer"
+            className="ml-auto flex items-center justify-center w-7 h-7 rounded-md text-[#9ba3b4] hover:text-white hover:bg-white/[0.06] transition-colors cursor-pointer"
             title="Unlink issue"
             aria-label="Unlink issue"
           >
@@ -690,12 +690,12 @@ function LinearIssueSection({ sessionId }: { sessionId: string }) {
         </div>
 
         {/* Title */}
-        <p className="text-[11px] text-cc-muted truncate" title={linkedIssue.title}>
+        <p className="text-[11px] text-[#9ba3b4] truncate" title={linkedIssue.title}>
           {linkedIssue.title}
         </p>
 
         {/* Metadata: priority + team + assignee */}
-        <div className="flex items-center gap-2 text-[10px] text-cc-muted">
+        <div className="flex items-center gap-2 text-[10px] text-[#9ba3b4]">
           {linkedIssue.priorityLabel && (
             <span>{linkedIssue.priorityLabel}</span>
           )}
@@ -731,15 +731,15 @@ function LinearIssueSection({ sessionId }: { sessionId: string }) {
 
       {/* Done warning */}
       {showDoneWarning && linkedIssue.stateType === "completed" && (
-        <div className="px-4 py-2 bg-cc-success/10 border-t border-cc-success/20 flex items-center justify-between gap-2">
+        <div className="px-4 py-2 bg-emerald-500/10 border-t border-emerald-500/20 flex items-center justify-between gap-2">
           <div className="min-w-0">
-            <p className="text-[11px] text-cc-success font-medium">Issue completed</p>
-            <p className="text-[10px] text-cc-success/80">Ticket moved to done.</p>
+            <p className="text-[11px] text-emerald-400 font-medium">Issue completed</p>
+            <p className="text-[10px] text-emerald-400/80">Ticket moved to done.</p>
           </div>
           <div className="flex items-center gap-1.5 shrink-0">
             <button
               onClick={() => setShowDoneWarning(false)}
-              className="text-[10px] text-cc-muted hover:text-cc-fg px-1.5 py-0.5 rounded cursor-pointer"
+              className="text-[10px] text-[#9ba3b4] hover:text-white px-1.5 py-0.5 rounded cursor-pointer"
             >
               Dismiss
             </button>
@@ -752,7 +752,7 @@ function LinearIssueSection({ sessionId }: { sessionId: string }) {
                   // silent
                 }
               }}
-              className="text-[10px] text-cc-success font-medium px-2 py-0.5 rounded bg-cc-success/20 hover:bg-cc-success/30 cursor-pointer"
+              className="text-[10px] text-emerald-400 font-medium px-2 py-0.5 rounded bg-emerald-500/20 hover:bg-emerald-500/30 cursor-pointer"
             >
               Close session
             </button>
@@ -763,14 +763,14 @@ function LinearIssueSection({ sessionId }: { sessionId: string }) {
       {/* Recent comments */}
       {comments.length > 0 && (
         <div className="px-4 py-2 space-y-1.5 max-h-36 overflow-y-auto">
-          <span className="text-[10px] text-cc-muted uppercase tracking-wider">Comments</span>
+          <span className="text-[10px] text-[#9ba3b4] uppercase tracking-wider">Comments</span>
           {comments.slice(-3).map((comment) => (
             <div key={comment.id} className="text-[11px]">
               <div className="flex items-center gap-1">
-                <span className="font-medium text-cc-fg">{comment.userName}</span>
-                <span className="text-[9px] text-cc-muted">{timeAgo(new Date(comment.createdAt).getTime())}</span>
+                <span className="font-medium text-[#f6f7fb]">{comment.userName}</span>
+                <span className="text-[9px] text-[#9ba3b4]">{timeAgo(new Date(comment.createdAt).getTime())}</span>
               </div>
-              <p className="text-cc-muted line-clamp-2">{comment.body}</p>
+              <p className="text-[#9ba3b4] line-clamp-2">{comment.body}</p>
             </div>
           ))}
         </div>
@@ -785,13 +785,13 @@ function LinearIssueSection({ sessionId }: { sessionId: string }) {
           onKeyDown={(e) => { if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); handleSendComment(); } }}
           placeholder="Add a comment..."
           aria-label="Add a comment"
-          className="flex-1 text-[11px] bg-transparent border border-cc-border rounded-md px-2 py-1.5 text-cc-fg placeholder:text-cc-muted focus:outline-none focus:border-cc-primary/50"
+          className="flex-1 text-[11px] bg-transparent border border-white/[0.1] rounded-md px-2 py-1.5 text-[#f6f7fb] placeholder:text-[#9ba3b4]/70 focus:outline-none focus:border-[rgba(255,79,163,0.5)]"
         />
         <button
           onClick={handleSendComment}
           disabled={!commentText.trim() || sendingComment}
           aria-label="Send comment"
-          className="flex items-center justify-center w-7 h-7 rounded-md text-cc-primary disabled:text-cc-muted cursor-pointer disabled:cursor-not-allowed transition-colors"
+          className="flex items-center justify-center w-7 h-7 rounded-md text-[#ff4fa3] disabled:text-[#9ba3b4] cursor-pointer disabled:cursor-not-allowed transition-colors"
           title="Send comment"
         >
           <svg viewBox="0 0 16 16" fill="currentColor" className="w-3.5 h-3.5">
@@ -839,33 +839,33 @@ function GitBranchSection({ sessionId }: { sessionId: string }) {
   return (
     <div className="shrink-0 px-4 py-2.5 space-y-1.5">
       <div className="flex items-center justify-between">
-        <p className="text-xs font-mono-code text-cc-fg truncate" title={branch}>
+        <p className="text-xs font-mono-code text-[#f6f7fb] truncate" title={branch}>
           {branch}
         </p>
         {session?.is_containerized && (
-          <span className="text-[10px] px-1.5 py-0.5 rounded bg-cc-info/10 text-cc-info shrink-0 ml-2">container</span>
+          <span className="text-[10px] px-1.5 py-0.5 rounded bg-sky-500/10 text-sky-400 shrink-0 ml-2">container</span>
         )}
       </div>
       {(branchAhead > 0 || branchBehind > 0 || lineAdds > 0 || lineRemoves > 0) && (
         <div className="flex items-center justify-between gap-2">
           <div className="flex items-center gap-1.5 text-[11px]">
             {branchAhead > 0 && (
-              <span className="text-cc-success">
+              <span className="text-emerald-400">
                 {branchAhead}&#8593;<span className="sr-only"> commits ahead</span>
               </span>
             )}
             {branchBehind > 0 && (
-              <span className="text-cc-warning">
+              <span className="text-yellow-400">
                 {branchBehind}&#8595;<span className="sr-only"> commits behind</span>
               </span>
             )}
             {lineAdds > 0 && (
-              <span className="text-cc-success">
+              <span className="text-emerald-400">
                 +{lineAdds}<span className="sr-only"> lines added</span>
               </span>
             )}
             {lineRemoves > 0 && (
-              <span className="text-cc-error">
+              <span className="text-[#ff6b6b]">
                 -{lineRemoves}<span className="sr-only"> lines removed</span>
               </span>
             )}
@@ -873,7 +873,7 @@ function GitBranchSection({ sessionId }: { sessionId: string }) {
           {branchBehind > 0 && branchCwd && (
             <button
               type="button"
-              className="text-[11px] font-medium text-cc-warning hover:text-cc-warning/80 transition-colors cursor-pointer"
+              className="text-[11px] font-medium text-yellow-400 hover:text-yellow-300 transition-colors cursor-pointer"
               onClick={() => {
                 api.gitPull(branchCwd).then((r) => {
                   useStore.getState().updateSession(sessionId, {
@@ -906,7 +906,7 @@ function TasksSection({ sessionId }: { sessionId: string }) {
   return (
     <div className="px-3 py-2">
       {tasks.length === 0 ? (
-        <p className="text-[11px] text-cc-muted text-center py-6">Tasks will appear here as the agent works</p>
+        <p className="text-[11px] text-[#9ba3b4] text-center py-6">Tasks will appear here as the agent works</p>
       ) : (
         <div className="space-y-0.5">
           {tasks.map((task) => (
@@ -938,7 +938,7 @@ function useSectionBadge(sectionId: string, sessionId: string): ReactNode {
   if (sectionId === "tasks" && tasks.length > 0) {
     const completedCount = tasks.filter((t) => t.status === "completed").length;
     return (
-      <span className="text-[10px] text-cc-muted tabular-nums">
+      <span className="text-[10px] text-[#9ba3b4] tabular-nums">
         {completedCount}/{tasks.length}
       </span>
     );
@@ -978,8 +978,8 @@ function TaskPanelConfigView({ isCodex }: { isCodex: boolean }) {
             <div
               key={sectionId}
               data-testid={`config-section-${sectionId}`}
-              className={`flex items-center gap-2 px-2.5 py-2 rounded-lg border border-cc-border transition-opacity ${
-                enabled ? "bg-cc-bg" : "bg-cc-hover/50 opacity-60"
+              className={`flex items-center gap-2 px-2.5 py-2 rounded-lg border border-white/[0.08] transition-opacity ${
+                enabled ? "bg-white/[0.03]" : "bg-white/[0.02] opacity-60"
               }`}
             >
               {/* Move up/down buttons */}
@@ -987,7 +987,7 @@ function TaskPanelConfigView({ isCodex }: { isCodex: boolean }) {
                 <button
                   onClick={() => moveSectionUp(sectionId)}
                   disabled={isFirst}
-                  className="w-5 h-4 flex items-center justify-center text-cc-muted hover:text-cc-fg disabled:opacity-20 disabled:cursor-not-allowed cursor-pointer transition-colors"
+                  className="w-5 h-4 flex items-center justify-center text-[#9ba3b4] hover:text-white disabled:opacity-20 disabled:cursor-not-allowed cursor-pointer transition-colors"
                   title="Move up"
                   data-testid={`move-up-${sectionId}`}
                 >
@@ -998,7 +998,7 @@ function TaskPanelConfigView({ isCodex }: { isCodex: boolean }) {
                 <button
                   onClick={() => moveSectionDown(sectionId)}
                   disabled={isLast}
-                  className="w-5 h-4 flex items-center justify-center text-cc-muted hover:text-cc-fg disabled:opacity-20 disabled:cursor-not-allowed cursor-pointer transition-colors"
+                  className="w-5 h-4 flex items-center justify-center text-[#9ba3b4] hover:text-white disabled:opacity-20 disabled:cursor-not-allowed cursor-pointer transition-colors"
                   title="Move down"
                   data-testid={`move-down-${sectionId}`}
                 >
@@ -1010,10 +1010,10 @@ function TaskPanelConfigView({ isCodex }: { isCodex: boolean }) {
 
               {/* Section info */}
               <div className="flex-1 min-w-0">
-                <span className="text-[12px] font-medium text-cc-fg block">
+                <span className="text-[12px] font-medium text-[#f6f7fb] block">
                   {def.label}
                 </span>
-                <span className="text-[10px] text-cc-muted block truncate">
+                <span className="text-[10px] text-[#9ba3b4] block truncate">
                   {def.description}
                 </span>
               </div>
@@ -1022,7 +1022,7 @@ function TaskPanelConfigView({ isCodex }: { isCodex: boolean }) {
               <button
                 onClick={() => toggleSectionEnabled(sectionId)}
                 className={`shrink-0 w-8 h-[18px] rounded-full transition-colors cursor-pointer relative ${
-                  enabled ? "bg-cc-primary" : "bg-cc-hover"
+                  enabled ? "bg-[#ff4fa3]" : "bg-white/[0.1]"
                 }`}
                 title={enabled ? "Hide section" : "Show section"}
                 role="switch"
@@ -1041,17 +1041,17 @@ function TaskPanelConfigView({ isCodex }: { isCodex: boolean }) {
       </div>
 
       {/* Footer buttons */}
-      <div className="shrink-0 px-3 py-2.5 flex items-center justify-between border-t border-cc-separator">
+      <div className="shrink-0 px-3 py-2.5 flex items-center justify-between border-t border-white/[0.07]">
         <button
           onClick={() => resetTaskPanelConfig()}
-          className="text-[11px] text-cc-muted hover:text-cc-fg transition-colors cursor-pointer"
+          className="text-[11px] text-[#9ba3b4] hover:text-white transition-colors cursor-pointer"
           data-testid="reset-panel-config"
         >
           Reset to defaults
         </button>
         <button
           onClick={() => setConfigMode(false)}
-          className="text-[11px] font-medium text-cc-primary hover:text-cc-primary-hover transition-colors cursor-pointer"
+          className="text-[11px] font-medium text-[#ff4fa3] hover:text-[#ff2f92] transition-colors cursor-pointer"
           data-testid="config-done"
         >
           Done
@@ -1109,11 +1109,11 @@ export function TaskPanel({ sessionId }: { sessionId: string }) {
   return (
     <aside
       aria-label="Session context"
-      className="w-full lg:w-[320px] h-full flex flex-col overflow-hidden bg-cc-card"
+      className="w-full lg:w-[320px] h-full flex flex-col overflow-hidden bg-[#0b0f18] border-l border-white/[0.07]"
     >
       {/* Header */}
-      <div className="shrink-0 h-11 flex items-center justify-between px-4 bg-cc-card border-b border-cc-separator">
-        <h2 className="text-sm font-semibold text-cc-fg tracking-tight">
+      <div className="shrink-0 h-12 flex items-center justify-between px-4 bg-[#0b0f18] border-b border-white/[0.07]">
+        <h2 className="text-sm font-semibold text-white tracking-tight">
           {configMode ? "Panel Settings" : "Context"}
         </h2>
         <button
@@ -1125,7 +1125,7 @@ export function TaskPanel({ sessionId }: { sessionId: string }) {
             }
           }}
           aria-label="Close panel"
-          className="flex items-center justify-center w-8 h-8 rounded-lg text-cc-muted hover:text-cc-fg hover:bg-cc-hover transition-colors cursor-pointer"
+          className="flex items-center justify-center w-8 h-8 rounded-lg text-[#9ba3b4] hover:text-white hover:bg-white/[0.055] transition-colors cursor-pointer"
         >
           <svg
             viewBox="0 0 16 16"
@@ -1161,10 +1161,10 @@ export function TaskPanel({ sessionId }: { sessionId: string }) {
           </div>
 
           {/* Settings button at bottom */}
-          <div className="shrink-0 px-4 py-2 pb-safe border-t border-cc-separator">
+          <div className="shrink-0 px-4 py-2 pb-safe border-t border-white/[0.07]">
             <button
               onClick={() => useStore.getState().setTaskPanelConfigMode(true)}
-              className="flex items-center gap-1.5 text-[11px] text-cc-muted hover:text-cc-fg transition-colors cursor-pointer"
+              className="flex items-center gap-1.5 text-[11px] text-[#9ba3b4] hover:text-white transition-colors cursor-pointer"
               title="Configure panel sections"
               data-testid="customize-panel-btn"
             >
@@ -1193,7 +1193,7 @@ function TaskRow({ task }: { task: TaskItem }) {
         <span className="shrink-0 flex items-center justify-center w-4 h-4 mt-px">
           {isInProgress ? (
             <svg
-              className="w-4 h-4 text-cc-primary animate-spin"
+              className="w-4 h-4 text-[#ff4fa3] animate-spin"
               viewBox="0 0 16 16"
               fill="none"
               aria-hidden
@@ -1213,7 +1213,7 @@ function TaskRow({ task }: { task: TaskItem }) {
             <svg
               viewBox="0 0 16 16"
               fill="currentColor"
-              className="w-4 h-4 text-cc-success"
+              className="w-4 h-4 text-[#42f59b]"
               aria-hidden
             >
               <path
@@ -1226,7 +1226,7 @@ function TaskRow({ task }: { task: TaskItem }) {
             <svg
               viewBox="0 0 16 16"
               fill="none"
-              className="w-4 h-4 text-cc-muted"
+              className="w-4 h-4 text-[#9ba3b4]/60"
               aria-hidden
             >
               <circle
@@ -1246,7 +1246,7 @@ function TaskRow({ task }: { task: TaskItem }) {
         {/* Subject — allow wrapping */}
         <span
           className={`text-[13px] leading-snug flex-1 ${
-            isCompleted ? "text-cc-muted line-through" : "text-cc-fg"
+            isCompleted ? "text-[#9ba3b4] line-through" : "text-[#f6f7fb]"
           }`}
         >
           {task.subject}
@@ -1255,14 +1255,14 @@ function TaskRow({ task }: { task: TaskItem }) {
 
       {/* Active form text (in_progress only) */}
       {isInProgress && task.activeForm && (
-        <p className="mt-1 ml-6 text-[11px] text-cc-muted italic truncate">
+        <p className="mt-1 ml-6 text-[11px] text-[#9ba3b4] italic truncate">
           {task.activeForm}
         </p>
       )}
 
       {/* Blocked by */}
       {task.blockedBy && task.blockedBy.length > 0 && (
-        <p className="mt-1 ml-6 text-[11px] text-cc-muted flex items-center gap-1">
+        <p className="mt-1 ml-6 text-[11px] text-[#9ba3b4] flex items-center gap-1">
           <svg viewBox="0 0 16 16" fill="none" className="w-3 h-3 shrink-0" aria-hidden>
             <circle
               cx="8"

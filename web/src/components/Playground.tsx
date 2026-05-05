@@ -3156,7 +3156,7 @@ function PlaygroundSubagentGroup({
     if (raw === "pending" || raw === "pendinginit" || raw === "pending_init")
       return {
         label: "pending",
-        className: "text-amber-700 bg-amber-500/15",
+        className: "text-pink-700 bg-pink-500/15",
         summary: "pending",
       };
     if (
@@ -3172,7 +3172,7 @@ function PlaygroundSubagentGroup({
       };
     return {
       label: status,
-      className: "text-amber-700 bg-amber-500/15",
+      className: "text-pink-700 bg-pink-500/15",
       summary: "running",
     };
   }, [status]);

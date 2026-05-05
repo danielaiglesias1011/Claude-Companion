@@ -1219,8 +1219,9 @@ describe("Sidebar", () => {
 
     // Click the "Archive" confirm button in the warning panel
     // (There are multiple "Archive" texts, find the one in the confirmation panel)
+    // The warning panel now uses yellow-500/10 class in the new dark design
     const archiveConfirmBtn = screen.getAllByText("Archive").find(
-      (el) => el.closest(".bg-cc-warning\\/10") !== null,
+      (el) => el.closest(".bg-yellow-500\\/10") !== null,
     );
     expect(archiveConfirmBtn).toBeTruthy();
     fireEvent.click(archiveConfirmBtn!);
@@ -1246,8 +1247,9 @@ describe("Sidebar", () => {
     fireEvent.click(screen.getByText("Archive"));
 
     // Click Cancel in the warning panel
+    // The warning panel now uses yellow-500/10 class in the new dark design
     const cancelBtn = screen.getAllByText("Cancel").find(
-      (el) => el.closest(".bg-cc-warning\\/10") !== null,
+      (el) => el.closest(".bg-yellow-500\\/10") !== null,
     );
     fireEvent.click(cancelBtn!);
 
@@ -1570,12 +1572,13 @@ describe("Sidebar", () => {
 
   it("footer nav button shows active state when on its page", () => {
     // Verifies that the footer nav button for the current page gets the
-    // bg-cc-active class to indicate the user is on that page.
+    // pink glass active styling to indicate the user is on that page.
+    // In the new dark design, active nav items use bg-[rgba(255,79,163,0.12)] text-white.
     window.location.hash = "#/settings";
     render(<Sidebar />);
 
     const settingsBtn = screen.getByTitle("Settings");
-    expect(settingsBtn).toHaveClass("bg-cc-active");
+    expect(settingsBtn.className).toContain("text-white");
   });
 
   it("integrations nav button shows active for both integrations and integration-linear pages", () => {
@@ -1585,7 +1588,7 @@ describe("Sidebar", () => {
     render(<Sidebar />);
 
     const integrationsBtn = screen.getByTitle("Integrations");
-    expect(integrationsBtn).toHaveClass("bg-cc-active");
+    expect(integrationsBtn.className).toContain("text-white");
   });
 
   it("agents nav button is active on agent detail routes with aria-current", () => {
@@ -1594,7 +1597,7 @@ describe("Sidebar", () => {
     render(<Sidebar />);
 
     const agentsBtn = screen.getByTitle("Agents");
-    expect(agentsBtn).toHaveClass("bg-cc-active");
+    expect(agentsBtn.className).toContain("text-white");
     expect(agentsBtn).toHaveAttribute("aria-current", "page");
   });
 

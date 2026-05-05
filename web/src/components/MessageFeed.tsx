@@ -289,27 +289,27 @@ function ToolMessageGroup({ group }: { group: ToolMsgGroup }) {
         <div className="flex items-start gap-3">
           <AssistantAvatar />
           <div className="flex-1 min-w-0">
-            <div className="border border-cc-border rounded-[10px] overflow-hidden bg-cc-card">
+            <div className="border border-white/[0.08] rounded-[10px] overflow-hidden bg-[rgba(13,17,32,0.8)]">
               <button
                 onClick={() => setOpen(!open)}
-                className="w-full flex items-center gap-2.5 px-3 py-2 text-left hover:bg-cc-hover transition-colors cursor-pointer"
+                className="w-full flex items-center gap-2.5 px-3 py-2 text-left hover:bg-white/[0.04] transition-colors cursor-pointer"
               >
                 <svg
                   viewBox="0 0 16 16"
                   fill="currentColor"
-                  className={`w-3 h-3 text-cc-muted transition-transform shrink-0 ${open ? "rotate-90" : ""}`}
+                  className={`w-3 h-3 text-[#9ba3b4] transition-transform shrink-0 ${open ? "rotate-90" : ""}`}
                 >
                   <path d="M6 4l4 4-4 4" />
                 </svg>
                 <ToolIcon type={iconType} />
-                <span className="text-xs font-medium text-cc-fg">{label}</span>
-                <span className="text-xs text-cc-muted truncate flex-1 font-mono-code">
+                <span className="text-xs font-medium text-[#f6f7fb]">{label}</span>
+                <span className="text-xs text-[#9ba3b4] truncate flex-1 font-mono-code">
                   {getPreview(item.name, item.input)}
                 </span>
               </button>
               {open && (
-                <div className="px-3 pb-3 pt-0 border-t border-cc-border mt-0">
-                  <pre className="mt-2 text-[11px] text-cc-muted font-mono-code whitespace-pre-wrap leading-relaxed max-h-60 overflow-y-auto">
+                <div className="px-3 pb-3 pt-0 border-t border-white/[0.08] mt-0">
+                  <pre className="mt-2 text-[11px] text-[#9ba3b4] font-mono-code whitespace-pre-wrap leading-relaxed max-h-60 overflow-y-auto">
                     {JSON.stringify(item.input, null, 2)}
                   </pre>
                 </div>
@@ -327,35 +327,35 @@ function ToolMessageGroup({ group }: { group: ToolMsgGroup }) {
       <div className="flex items-start gap-3">
         <AssistantAvatar />
         <div className="flex-1 min-w-0">
-          <div className="border border-cc-border rounded-[10px] overflow-hidden bg-cc-card">
+          <div className="border border-white/[0.08] rounded-[10px] overflow-hidden bg-[rgba(13,17,32,0.8)]">
             <button
               onClick={() => setOpen(!open)}
-              className="w-full flex items-center gap-2.5 px-3 py-2 text-left hover:bg-cc-hover transition-colors cursor-pointer"
+              className="w-full flex items-center gap-2.5 px-3 py-2 text-left hover:bg-white/[0.04] transition-colors cursor-pointer"
             >
               <svg
                 viewBox="0 0 16 16"
                 fill="currentColor"
-                className={`w-3 h-3 text-cc-muted transition-transform shrink-0 ${open ? "rotate-90" : ""}`}
+                className={`w-3 h-3 text-[#9ba3b4] transition-transform shrink-0 ${open ? "rotate-90" : ""}`}
               >
                 <path d="M6 4l4 4-4 4" />
               </svg>
               <ToolIcon type={iconType} />
-              <span className="text-xs font-medium text-cc-fg">{label}</span>
-              <span className="text-[10px] text-cc-muted bg-cc-hover rounded-full px-1.5 py-0.5 tabular-nums font-medium">
+              <span className="text-xs font-medium text-[#f6f7fb]">{label}</span>
+              <span className="text-[10px] text-[#9ba3b4] bg-white/[0.06] rounded-full px-1.5 py-0.5 tabular-nums font-medium">
                 {count}
               </span>
             </button>
 
             {open && (
-              <div className="border-t border-cc-border px-3 py-1.5">
+              <div className="border-t border-white/[0.08] px-3 py-1.5">
                 {group.items.map((item, i) => {
                   const preview = getPreview(item.name, item.input);
                   return (
                     <div
                       key={item.id || i}
-                      className="flex items-center gap-2 py-1 text-xs text-cc-muted font-mono-code truncate"
+                      className="flex items-center gap-2 py-1 text-xs text-[#9ba3b4] font-mono-code truncate"
                     >
-                      <span className="w-1 h-1 rounded-full bg-cc-muted/40 shrink-0" />
+                      <span className="w-1 h-1 rounded-full bg-[#9ba3b4]/40 shrink-0" />
                       <span className="truncate">
                         {preview || JSON.stringify(item.input).slice(0, 80)}
                       </span>
@@ -410,7 +410,7 @@ function normalizeSubagentStatus(status?: string): {
     return {
       label: "failed",
       summaryLabel: "failed",
-      className: "text-cc-error bg-cc-error/10",
+      className: "text-[#ff6b6b] bg-[#ff6b6b]/10",
     };
   }
   if (
@@ -421,7 +421,7 @@ function normalizeSubagentStatus(status?: string): {
     return {
       label: "pending",
       summaryLabel: "pending",
-      className: "text-amber-700 bg-amber-500/15",
+      className: "text-pink-700 bg-pink-500/15",
     };
   }
   if (
@@ -439,7 +439,7 @@ function normalizeSubagentStatus(status?: string): {
   return {
     label: status,
     summaryLabel: "running",
-    className: "text-amber-700 bg-amber-500/15",
+    className: "text-pink-700 bg-pink-500/15",
   };
 }
 
@@ -478,7 +478,7 @@ function SubagentContainer({ group }: { group: SubagentGroup }) {
 
   return (
     <div className="animate-[fadeSlideIn_0.2s_ease-out]">
-      <div className="ml-10 border-l-2 border-cc-primary/20 pl-4">
+      <div className="ml-10 border-l-2 border-[rgba(255,79,163,0.25)] pl-4">
         <button
           onClick={() => setOpen(!open)}
           className="w-full flex items-center gap-2 py-1.5 text-left cursor-pointer mb-1"
@@ -486,7 +486,7 @@ function SubagentContainer({ group }: { group: SubagentGroup }) {
           <svg
             viewBox="0 0 16 16"
             fill="currentColor"
-            className={`w-3 h-3 text-cc-muted transition-transform shrink-0 ${open ? "rotate-90" : ""}`}
+            className={`w-3 h-3 text-[#9ba3b4] transition-transform shrink-0 ${open ? "rotate-90" : ""}`}
           >
             <path d="M6 4l4 4-4 4" />
           </svg>
@@ -495,20 +495,20 @@ function SubagentContainer({ group }: { group: SubagentGroup }) {
             fill="none"
             stroke="currentColor"
             strokeWidth="1.5"
-            className="w-3.5 h-3.5 text-cc-primary shrink-0"
+            className="w-3.5 h-3.5 text-[#ff4fa3] shrink-0"
           >
             <circle cx="8" cy="8" r="5" />
             <path d="M8 5v3l2 1" strokeLinecap="round" />
           </svg>
-          <span className="text-xs font-medium text-cc-fg truncate">
+          <span className="text-xs font-medium text-[#f6f7fb] truncate">
             {label}
           </span>
           {agentType && (
-            <span className="text-[10px] text-cc-muted bg-cc-hover rounded-full px-1.5 py-0.5 shrink-0">
+            <span className="text-[10px] text-[#9ba3b4] bg-white/[0.06] rounded-full px-1.5 py-0.5 shrink-0">
               {agentType}
             </span>
           )}
-          <span className="text-[10px] text-cc-muted bg-cc-hover rounded-full px-1.5 py-0.5 shrink-0">
+          <span className="text-[10px] text-[#9ba3b4] bg-white/[0.06] rounded-full px-1.5 py-0.5 shrink-0">
             {backend === "codex" ? "Codex" : "Claude"}
           </span>
           {status && (
@@ -519,16 +519,16 @@ function SubagentContainer({ group }: { group: SubagentGroup }) {
             </span>
           )}
           {receiverCount !== undefined && (
-            <span className="text-[10px] text-cc-muted bg-cc-hover rounded-full px-1.5 py-0.5 shrink-0">
+            <span className="text-[10px] text-[#9ba3b4] bg-white/[0.06] rounded-full px-1.5 py-0.5 shrink-0">
               {receiverCount} agent{receiverCount === 1 ? "" : "s"}
             </span>
           )}
           {!open && lastPreview && (
-            <span className="text-[11px] text-cc-muted truncate ml-1 font-mono-code">
+            <span className="text-[11px] text-[#9ba3b4] truncate ml-1 font-mono-code">
               {lastPreview}
             </span>
           )}
-          <span className="text-[10px] text-cc-muted bg-cc-hover rounded-full px-1.5 py-0.5 tabular-nums shrink-0 ml-auto">
+          <span className="text-[10px] text-[#9ba3b4] bg-white/[0.06] rounded-full px-1.5 py-0.5 tabular-nums shrink-0 ml-auto">
             {childCount}
           </span>
         </button>
@@ -536,7 +536,7 @@ function SubagentContainer({ group }: { group: SubagentGroup }) {
         {open && (
           <div className="space-y-3 pb-2">
             {(status || senderThreadId || receiverThreadIds.length > 0) && (
-              <div className="rounded-lg border border-cc-border bg-cc-card px-2.5 py-2 space-y-1.5">
+              <div className="rounded-lg border border-white/[0.08] bg-[rgba(13,17,32,0.8)] px-2.5 py-2 space-y-1.5">
                 <div className="flex flex-wrap items-center gap-1.5 text-[10px]">
                   {status && (
                     <span
@@ -546,12 +546,12 @@ function SubagentContainer({ group }: { group: SubagentGroup }) {
                     </span>
                   )}
                   {senderThreadId && (
-                    <span className="rounded-full px-1.5 py-0.5 text-cc-muted bg-cc-hover font-mono-code">
+                    <span className="rounded-full px-1.5 py-0.5 text-[#9ba3b4] bg-white/[0.06] font-mono-code">
                       sender: {senderThreadId}
                     </span>
                   )}
                   {receiverThreadIds.length > 0 && (
-                    <span className="rounded-full px-1.5 py-0.5 text-cc-muted bg-cc-hover">
+                    <span className="rounded-full px-1.5 py-0.5 text-[#9ba3b4] bg-white/[0.06]">
                       receivers: {receiverThreadIds.length}
                     </span>
                   )}
@@ -561,7 +561,7 @@ function SubagentContainer({ group }: { group: SubagentGroup }) {
                     {receiverThreadIds.map((threadId) => (
                       <span
                         key={threadId}
-                        className="text-[10px] rounded-full px-1.5 py-0.5 text-cc-muted bg-cc-hover font-mono-code"
+                        className="text-[10px] rounded-full px-1.5 py-0.5 text-[#9ba3b4] bg-white/[0.06] font-mono-code"
                       >
                         {threadId}
                       </span>
@@ -580,11 +580,11 @@ function SubagentContainer({ group }: { group: SubagentGroup }) {
 
 function AssistantAvatar() {
   return (
-    <div className="w-7 h-7 rounded-full bg-cc-primary/10 flex items-center justify-center shrink-0 mt-0.5">
+    <div className="w-7 h-7 rounded-full bg-[rgba(255,79,163,0.12)] border border-[rgba(255,79,163,0.25)] flex items-center justify-center shrink-0 mt-0.5">
       <svg
         viewBox="0 0 16 16"
         fill="currentColor"
-        className="w-3.5 h-3.5 text-cc-primary"
+        className="w-3.5 h-3.5 text-[#ff4fa3]"
       >
         <circle cx="8" cy="8" r="3" />
       </svg>
@@ -862,13 +862,13 @@ export function MessageFeed({ sessionId }: { sessionId: string }) {
   if (mergedMessages.length === 0) {
     return (
       <div className="flex-1 flex flex-col items-center justify-center gap-4 select-none px-6">
-        <div className="w-14 h-14 rounded-2xl bg-cc-card border border-cc-border flex items-center justify-center">
+        <div className="w-14 h-14 rounded-2xl bg-[rgba(255,79,163,0.08)] border border-[rgba(255,79,163,0.2)] flex items-center justify-center shadow-[0_0_24px_rgba(255,79,163,0.15)]">
           <svg
             viewBox="0 0 24 24"
             fill="none"
             stroke="currentColor"
             strokeWidth="1.5"
-            className="w-7 h-7 text-cc-muted"
+            className="w-7 h-7 text-[#ff4fa3]"
           >
             <polyline points="4 17 10 11 4 5" />
             <line x1="12" y1="19" x2="20" y2="19" />
@@ -877,10 +877,10 @@ export function MessageFeed({ sessionId }: { sessionId: string }) {
         <div className="text-center">
           {canLoadResumeHistory ? (
             <>
-              <p className="text-sm text-cc-fg font-medium mb-1">
+              <p className="text-sm text-[#f6f7fb] font-medium mb-1">
                 This session has prior Claude context
               </p>
-              <p className="text-xs text-cc-muted leading-relaxed mb-3">
+              <p className="text-xs text-[#9ba3b4] leading-relaxed mb-3">
                 {resumeModeLabel} {resumeSourceSessionId.slice(0, 8)}. Load
                 earlier messages into this chat when needed.
               </p>
@@ -889,22 +889,22 @@ export function MessageFeed({ sessionId }: { sessionId: string }) {
                   void loadResumeHistoryPage({ preserveScroll: false })
                 }
                 disabled={resumeHistoryLoading}
-                className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium text-cc-fg bg-cc-card border border-cc-border rounded-lg hover:bg-cc-hover transition-colors disabled:opacity-60 disabled:cursor-not-allowed cursor-pointer"
+                className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium text-[#f6f7fb] bg-[rgba(13,17,32,0.8)] border border-white/[0.1] rounded-lg hover:bg-white/[0.055] transition-colors disabled:opacity-60 disabled:cursor-not-allowed cursor-pointer"
               >
                 {resumeHistoryLoading ? "Loading..." : "Load previous history"}
               </button>
               {resumeHistoryError && (
-                <p className="text-xs text-cc-error mt-2">
+                <p className="text-xs text-[#ff6b6b] mt-2">
                   {resumeHistoryError}
                 </p>
               )}
             </>
           ) : (
             <>
-              <p className="text-sm text-cc-fg font-medium mb-1">
+              <p className="text-sm text-[#f6f7fb] font-medium mb-1">
                 Start a conversation
               </p>
-              <p className="text-xs text-cc-muted leading-relaxed">
+              <p className="text-xs text-[#9ba3b4] leading-relaxed">
                 Send a message to begin working with Companion.
               </p>
             </>
@@ -917,7 +917,7 @@ export function MessageFeed({ sessionId }: { sessionId: string }) {
   return (
     <div className="flex-1 min-h-0 relative overflow-hidden">
       {/* Top fade — softens the scroll edge under the top bar */}
-      <div className="pointer-events-none absolute top-0 inset-x-0 h-6 bg-gradient-to-b from-cc-bg to-transparent z-10" />
+      <div className="pointer-events-none absolute top-0 inset-x-0 h-6 bg-gradient-to-b from-[#05070d] to-transparent z-10" />
       <div
         ref={containerRef}
         onScroll={handleScroll}
@@ -925,13 +925,13 @@ export function MessageFeed({ sessionId }: { sessionId: string }) {
       >
         <div className="max-w-3xl mx-auto space-y-5 sm:space-y-7">
           {canLoadResumeHistory && !resumeHistoryLoaded && (
-            <div className="rounded-xl border border-cc-border bg-cc-card p-3">
+            <div className="rounded-xl border border-white/[0.08] bg-[rgba(13,17,32,0.8)] p-3">
               <div className="flex items-center justify-between gap-3">
                 <div>
-                  <p className="text-xs font-medium text-cc-fg">
+                  <p className="text-xs font-medium text-[#f6f7fb]">
                     {resumeModeLabel} existing Claude thread
                   </p>
-                  <p className="text-[11px] text-cc-muted mt-1">
+                  <p className="text-[11px] text-[#9ba3b4] mt-1">
                     {resumeSourceSessionId}{" "}
                     {sdkSession?.cwd
                       ? `· ${formatResumeSourcePath(sdkSession.cwd)}`
@@ -943,7 +943,7 @@ export function MessageFeed({ sessionId }: { sessionId: string }) {
                     void loadResumeHistoryPage({ preserveScroll: true })
                   }
                   disabled={resumeHistoryLoading}
-                  className="shrink-0 inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium text-cc-fg bg-cc-card border border-cc-border rounded-lg hover:bg-cc-hover transition-colors disabled:opacity-60 disabled:cursor-not-allowed cursor-pointer"
+                  className="shrink-0 inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium text-[#f6f7fb] bg-[rgba(13,17,32,0.8)] border border-white/[0.1] rounded-lg hover:bg-white/[0.055] transition-colors disabled:opacity-60 disabled:cursor-not-allowed cursor-pointer"
                 >
                   {resumeHistoryLoading
                     ? "Loading..."
@@ -951,7 +951,7 @@ export function MessageFeed({ sessionId }: { sessionId: string }) {
                 </button>
               </div>
               {resumeHistoryError && (
-                <p className="text-xs text-cc-error mt-2">
+                <p className="text-xs text-[#ff6b6b] mt-2">
                   {resumeHistoryError}
                 </p>
               )}
@@ -960,7 +960,7 @@ export function MessageFeed({ sessionId }: { sessionId: string }) {
 
           {canLoadResumeHistory && resumeHistoryLoaded && (
             <div className="flex justify-center">
-              <p className="text-[11px] text-cc-muted">
+              <p className="text-[11px] text-[#9ba3b4]">
                 {resumeHistoryHasMore
                   ? resumeHistoryLoading
                     ? "Loading older transcript..."
@@ -974,7 +974,7 @@ export function MessageFeed({ sessionId }: { sessionId: string }) {
             <div className="flex justify-center pb-2">
               <button
                 onClick={handleLoadMore}
-                className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium text-cc-muted hover:text-cc-fg bg-cc-card border border-cc-border rounded-lg hover:bg-cc-hover transition-colors cursor-pointer"
+                className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium text-[#9ba3b4] hover:text-white bg-[rgba(13,17,32,0.8)] border border-white/[0.08] rounded-lg hover:bg-white/[0.055] transition-colors cursor-pointer"
               >
                 <svg
                   viewBox="0 0 16 16"
@@ -992,13 +992,13 @@ export function MessageFeed({ sessionId }: { sessionId: string }) {
 
           {/* Tool progress indicator */}
           {toolProgress && toolProgress.size > 0 && !hasStreamingAssistant && (
-            <div className="flex items-center gap-1.5 text-[11px] text-cc-muted font-mono-code pl-10">
-              <span className="inline-block w-1.5 h-1.5 rounded-full bg-cc-primary animate-pulse" />
+            <div className="flex items-center gap-1.5 text-[11px] text-[#9ba3b4] font-mono-code pl-10">
+              <span className="inline-block w-1.5 h-1.5 rounded-full bg-[#ff4fa3] animate-pulse shadow-[0_0_6px_rgba(255,79,163,0.8)]" />
               {Array.from(toolProgress.values()).map((p, i) => (
                 <span key={i} className="flex items-center gap-1">
-                  {i > 0 && <span className="text-cc-muted/40">·</span>}
+                  {i > 0 && <span className="text-[#9ba3b4]/40">·</span>}
                   <span>{getToolLabel(p.toolName)}</span>
-                  <span className="text-cc-muted/60">{p.elapsedSeconds}s</span>
+                  <span className="text-[#9ba3b4]/60">{p.elapsedSeconds}s</span>
                 </span>
               ))}
             </div>
@@ -1006,7 +1006,7 @@ export function MessageFeed({ sessionId }: { sessionId: string }) {
 
           {/* Compacting context indicator */}
           {sessionStatus === "compacting" && (
-            <div className="flex items-center gap-1.5 text-[11px] text-cc-warning font-mono-code pl-10">
+            <div className="flex items-center gap-1.5 text-[11px] text-yellow-400 font-mono-code pl-10">
               <svg
                 className="w-3 h-3 animate-spin shrink-0"
                 viewBox="0 0 16 16"
@@ -1023,18 +1023,18 @@ export function MessageFeed({ sessionId }: { sessionId: string }) {
 
           {/* Generation stats bar */}
           {sessionStatus === "running" && elapsed > 0 && (
-            <div className="flex items-center gap-1.5 text-[11px] text-cc-muted font-mono-code pl-10">
-              <span className="inline-block w-1.5 h-1.5 rounded-full bg-cc-primary animate-pulse" />
+            <div className="flex items-center gap-1.5 text-[11px] text-[#9ba3b4] font-mono-code pl-10">
+              <span className="inline-block w-1.5 h-1.5 rounded-full bg-[#ff4fa3] animate-pulse shadow-[0_0_6px_rgba(255,79,163,0.8)]" />
               <span>Generating...</span>
-              <span className="text-cc-muted/60">(</span>
+              <span className="text-[#9ba3b4]/60">(</span>
               <span>{formatElapsed(elapsed)}</span>
               {(streamingOutputTokens ?? 0) > 0 && (
                 <>
-                  <span className="text-cc-muted/40">·</span>
+                  <span className="text-[#9ba3b4]/40">·</span>
                   <span>↓ {formatTokenCount(streamingOutputTokens!)}</span>
                 </>
               )}
-              <span className="text-cc-muted/60">)</span>
+              <span className="text-[#9ba3b4]/60">)</span>
             </div>
           )}
 

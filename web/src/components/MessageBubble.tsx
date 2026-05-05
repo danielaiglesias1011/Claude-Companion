@@ -8,11 +8,11 @@ export function MessageBubble({ message }: { message: ChatMessage }) {
   if (message.role === "system") {
     return (
       <div className="flex items-center gap-3 py-1 min-w-0">
-        <div className="shrink-0 flex-1 h-px bg-cc-border" />
-        <span className="text-[11px] text-cc-muted italic font-mono-code px-1 min-w-0 break-words text-center">
+        <div className="shrink-0 flex-1 h-px bg-white/[0.06]" />
+        <span className="text-[11px] text-[#9ba3b4] italic font-mono-code px-1 min-w-0 break-words text-center">
           {message.content}
         </span>
-        <div className="shrink-0 flex-1 h-px bg-cc-border" />
+        <div className="shrink-0 flex-1 h-px bg-white/[0.06]" />
       </div>
     );
   }
@@ -20,7 +20,7 @@ export function MessageBubble({ message }: { message: ChatMessage }) {
   if (message.role === "user") {
     return (
       <div className="flex justify-end animate-[fadeSlideIn_0.2s_ease-out]">
-        <div className="max-w-[85%] sm:max-w-[80%] px-3 sm:px-4 py-2.5 rounded-[14px] rounded-br-[4px] bg-gradient-to-br from-cc-user-bubble to-cc-primary/[0.08] text-cc-fg shadow-[0_2px_12px_rgba(212,75,122,0.10),inset_0_1px_0_rgba(255,255,255,0.6)]">
+        <div className="max-w-[85%] sm:max-w-[80%] px-3 sm:px-4 py-2.5 rounded-[14px] rounded-br-[4px] bg-[rgba(17,22,40,0.9)] border border-white/[0.1] text-[#f6f7fb] shadow-[0_4px_20px_rgba(0,0,0,0.35),inset_0_1px_0_rgba(255,255,255,0.06)]">
           {message.images && message.images.length > 0 && (
             <div className="flex gap-2 flex-wrap mb-2">
               {message.images.map((img, i) => (
@@ -156,8 +156,8 @@ function AssistantMessage({ message }: { message: ChatMessage }) {
 
 function AssistantAvatar() {
   return (
-    <div className="w-6 h-6 rounded-full bg-cc-primary/10 flex items-center justify-center shrink-0 mt-0.5">
-      <svg viewBox="0 0 16 16" fill="currentColor" className="w-3 h-3 text-cc-primary">
+    <div className="w-6 h-6 rounded-full bg-[rgba(255,79,163,0.12)] border border-[rgba(255,79,163,0.25)] flex items-center justify-center shrink-0 mt-0.5">
+      <svg viewBox="0 0 16 16" fill="currentColor" className="w-3 h-3 text-[#ff4fa3]">
         <circle cx="8" cy="8" r="3" />
       </svg>
     </div>
@@ -166,7 +166,7 @@ function AssistantAvatar() {
 
 function MarkdownContent({ text, showCursor = false }: { text: string; showCursor?: boolean }) {
   return (
-    <div className="markdown-body text-[14px] sm:text-[15px] text-cc-fg leading-relaxed overflow-hidden">
+    <div className="markdown-body text-[14px] sm:text-[15px] text-[#f6f7fb] leading-relaxed overflow-hidden">
       <Markdown
         remarkPlugins={[remarkGfm]}
         components={{
@@ -174,19 +174,19 @@ function MarkdownContent({ text, showCursor = false }: { text: string; showCurso
             <p className="mb-3 last:mb-0">{children}</p>
           ),
           strong: ({ children }) => (
-            <strong className="font-semibold text-cc-fg">{children}</strong>
+            <strong className="font-semibold text-[#f6f7fb]">{children}</strong>
           ),
           em: ({ children }) => (
             <em className="italic">{children}</em>
           ),
           h1: ({ children }) => (
-            <h1 className="text-xl font-bold text-cc-fg mt-4 mb-2">{children}</h1>
+            <h1 className="text-xl font-bold text-[#f6f7fb] mt-4 mb-2">{children}</h1>
           ),
           h2: ({ children }) => (
-            <h2 className="text-lg font-bold text-cc-fg mt-3 mb-2">{children}</h2>
+            <h2 className="text-lg font-bold text-[#f6f7fb] mt-3 mb-2">{children}</h2>
           ),
           h3: ({ children }) => (
-            <h3 className="text-base font-semibold text-cc-fg mt-3 mb-1">{children}</h3>
+            <h3 className="text-base font-semibold text-[#f6f7fb] mt-3 mb-1">{children}</h3>
           ),
           ul: ({ children }) => (
             <ul className="list-disc pl-5 mb-3 space-y-1">{children}</ul>
@@ -195,25 +195,25 @@ function MarkdownContent({ text, showCursor = false }: { text: string; showCurso
             <ol className="list-decimal pl-5 mb-3 space-y-1">{children}</ol>
           ),
           li: ({ children }) => (
-            <li className="text-cc-fg">{children}</li>
+            <li className="text-[#f6f7fb]">{children}</li>
           ),
           a: ({ href, children }) => {
             if (href && !href.startsWith("http") && !href.startsWith("//") && DOWNLOADABLE_EXTENSIONS.test(href)) {
               return <DownloadLink path={href}>{children}</DownloadLink>;
             }
             return (
-              <a href={href} target="_blank" rel="noopener noreferrer" className="text-cc-primary hover:underline">
+              <a href={href} target="_blank" rel="noopener noreferrer" className="text-[#ff4fa3] hover:underline">
                 {children}
               </a>
             );
           },
           blockquote: ({ children }) => (
-            <blockquote className="border-l-2 border-cc-primary/30 pl-3 my-2 text-cc-muted italic">
+            <blockquote className="border-l-2 border-[rgba(255,79,163,0.35)] pl-3 my-2 text-[#9ba3b4] italic">
               {children}
             </blockquote>
           ),
           hr: () => (
-            <hr className="border-cc-border my-4" />
+            <hr className="border-white/[0.08] my-4" />
           ),
           code: (props: ComponentProps<"code">) => {
             const { children, className } = props;
@@ -224,16 +224,16 @@ function MarkdownContent({ text, showCursor = false }: { text: string; showCurso
               const lang = match?.[1] || "";
               const codeText = typeof children === "string" ? children : String(children ?? "");
               return (
-                <div className="my-2 rounded-xl overflow-hidden border border-cc-border shadow-[0_2px_8px_rgba(0,0,0,0.04),inset_0_1px_0_rgba(255,255,255,0.06)]">
-                  <div className="flex items-center justify-between px-3 py-1.5 bg-gradient-to-b from-cc-code-bg to-cc-code-bg/80 border-b border-cc-border">
+                <div className="my-2 rounded-2xl overflow-hidden border border-[rgba(255,79,163,0.2)] shadow-[0_18px_50px_rgba(0,0,0,0.35),inset_0_1px_0_rgba(255,255,255,0.04)]">
+                  <div className="flex items-center justify-between px-3 py-1.5 bg-[rgba(5,9,17,0.95)] border-b border-[rgba(255,79,163,0.15)]">
                     {lang ? (
-                      <span className="text-[10px] text-cc-muted font-mono-code uppercase tracking-wider">{lang}</span>
+                      <span className="text-[10px] text-[#ff4fa3]/70 font-mono-code uppercase tracking-wider">{lang}</span>
                     ) : (
                       <span />
                     )}
                     <CopyButton text={codeText} />
                   </div>
-                  <pre className="px-2 sm:px-3 py-2 sm:py-2.5 bg-cc-code-bg text-cc-code-fg text-[12px] sm:text-[13px] font-mono-code leading-relaxed overflow-x-auto">
+                  <pre className="px-2 sm:px-3 py-2 sm:py-2.5 bg-[rgba(5,9,17,0.92)] text-[#c4c9d6] text-[12px] sm:text-[13px] font-mono-code leading-relaxed overflow-x-auto">
                     <code>{children}</code>
                   </pre>
                 </div>
@@ -241,7 +241,7 @@ function MarkdownContent({ text, showCursor = false }: { text: string; showCurso
             }
 
             return (
-              <code className="px-1.5 py-0.5 rounded-md bg-cc-fg/[0.06] text-[13px] font-mono-code text-cc-fg/80">
+              <code className="px-1.5 py-0.5 rounded-lg bg-[rgba(255,79,163,0.12)] text-[#ff8cc8] text-[13px] font-mono-code">
                 {children}
               </code>
             );
@@ -249,21 +249,21 @@ function MarkdownContent({ text, showCursor = false }: { text: string; showCurso
           pre: ({ children }) => <>{children}</>,
           table: ({ children }) => (
             <div className="overflow-x-auto my-2">
-              <table className="min-w-full text-sm border border-cc-border rounded-lg overflow-hidden">
+              <table className="min-w-full text-sm border border-white/[0.08] rounded-lg overflow-hidden">
                 {children}
               </table>
             </div>
           ),
           thead: ({ children }) => (
-            <thead className="bg-cc-code-bg/50">{children}</thead>
+            <thead className="bg-[rgba(255,79,163,0.06)]">{children}</thead>
           ),
           th: ({ children }) => (
-            <th className="px-3 py-1.5 text-left text-xs font-semibold text-cc-fg border-b border-cc-border">
+            <th className="px-3 py-1.5 text-left text-xs font-semibold text-[#f6f7fb] border-b border-white/[0.08]">
               {children}
             </th>
           ),
           td: ({ children }) => (
-            <td className="px-3 py-1.5 text-xs text-cc-fg border-b border-cc-border">
+            <td className="px-3 py-1.5 text-xs text-[#c4c9d6] border-b border-white/[0.06]">
               {children}
             </td>
           ),
@@ -274,7 +274,7 @@ function MarkdownContent({ text, showCursor = false }: { text: string; showCurso
       {showCursor && (
         <span
           data-testid="assistant-stream-cursor"
-          className="inline-block w-0.5 h-4 bg-cc-primary ml-0.5 align-middle animate-[pulse-dot_0.8s_ease-in-out_infinite]"
+          className="inline-block w-0.5 h-4 bg-[#ff4fa3] ml-0.5 align-middle animate-[pulse-dot_0.8s_ease-in-out_infinite]"
         />
       )}
     </div>
@@ -311,8 +311,8 @@ function ContentBlockRenderer({
     return (
       <div className={`text-xs font-mono-code rounded-lg px-3 py-2 border ${
         isError
-          ? "bg-cc-error/5 border-cc-error/20 text-cc-error"
-          : "bg-cc-card border-cc-border text-cc-muted"
+          ? "bg-[#ff6b6b]/5 border-[#ff6b6b]/20 text-[#ff6b6b]"
+          : "bg-[rgba(5,9,17,0.8)] border-white/[0.07] text-[#9ba3b4]"
       } max-h-40 overflow-y-auto whitespace-pre-wrap`}>
         {content}
       </div>
@@ -331,26 +331,26 @@ function BashResultBlock({ text, isError }: { text: string; isError: boolean }) 
   return (
     <div className={`rounded-xl border ${
       isError
-        ? "bg-cc-error/5 border-cc-error/20"
-        : "bg-cc-card border-cc-border shadow-[0_1px_4px_rgba(0,0,0,0.04),inset_0_1px_0_rgba(255,255,255,0.06)]"
+        ? "bg-[#ff6b6b]/5 border-[#ff6b6b]/20"
+        : "bg-[rgba(5,9,17,0.8)] border-white/[0.07] shadow-[0_2px_12px_rgba(0,0,0,0.25),inset_0_1px_0_rgba(255,255,255,0.04)]"
     }`}>
-      <div className="flex items-center justify-between px-3 py-1.5 border-b border-cc-border">
+      <div className="flex items-center justify-between px-3 py-1.5 border-b border-white/[0.07]">
         <span className={`text-[10px] font-medium ${
-          isError ? "text-cc-error" : "text-cc-muted"
+          isError ? "text-[#ff6b6b]" : "text-[#9ba3b4]"
         }`}>
           {hasMore && !showFull ? "Output (last 20 lines)" : "Output"}
         </span>
         {hasMore && (
           <button
             onClick={() => setShowFull(!showFull)}
-            className="text-[10px] text-cc-primary hover:underline cursor-pointer"
+            className="text-[10px] text-[#ff4fa3] hover:underline cursor-pointer"
           >
             {showFull ? "Show tail" : "Show full"}
           </button>
         )}
       </div>
       <pre className={`text-xs font-mono-code px-3 py-2 whitespace-pre-wrap max-h-60 overflow-y-auto ${
-        isError ? "text-cc-error" : "text-cc-muted"
+        isError ? "text-[#ff6b6b]" : "text-[#9ba3b4]"
       }`}>
         {rendered}
       </pre>
@@ -364,32 +364,32 @@ function ToolGroupBlock({ name, items }: { name: string; items: ToolGroupItem[] 
   const label = getToolLabel(name);
 
   return (
-    <div className="border border-cc-border/80 rounded-[10px] overflow-hidden bg-cc-card shadow-[0_1px_4px_rgba(0,0,0,0.04),inset_0_1px_0_rgba(255,255,255,0.08)]">
+    <div className="border border-white/[0.08] rounded-[10px] overflow-hidden bg-[rgba(13,17,32,0.8)] shadow-[0_2px_12px_rgba(0,0,0,0.25),inset_0_1px_0_rgba(255,255,255,0.04)]">
       <button
         onClick={() => setOpen(!open)}
-        className="w-full flex items-center gap-2.5 px-3 py-2 text-left hover:bg-cc-hover transition-colors cursor-pointer"
+        className="w-full flex items-center gap-2.5 px-3 py-2 text-left hover:bg-white/[0.04] transition-colors cursor-pointer"
       >
         <svg
           viewBox="0 0 16 16"
           fill="currentColor"
-          className={`w-3 h-3 text-cc-muted transition-transform shrink-0 ${open ? "rotate-90" : ""}`}
+          className={`w-3 h-3 text-[#9ba3b4] transition-transform shrink-0 ${open ? "rotate-90" : ""}`}
         >
           <path d="M6 4l4 4-4 4" />
         </svg>
         <ToolIcon type={iconType} />
-        <span className="text-xs font-medium text-cc-fg">{label}</span>
-        <span className="text-[10px] text-cc-muted bg-cc-hover rounded-full px-1.5 py-0.5 tabular-nums">
+        <span className="text-xs font-medium text-[#f6f7fb]">{label}</span>
+        <span className="text-[10px] text-[#9ba3b4] bg-white/[0.06] rounded-full px-1.5 py-0.5 tabular-nums">
           {items.length}
         </span>
       </button>
 
       {open && (
-        <div className="border-t border-cc-border px-3 py-1.5">
+        <div className="border-t border-white/[0.07] px-3 py-1.5">
           {items.map((item, i) => {
             const preview = getPreview(item.name, item.input);
             return (
-              <div key={item.id || i} className="flex items-center gap-2 py-1 text-xs text-cc-muted font-mono-code truncate">
-                <span className="w-1 h-1 rounded-full bg-cc-muted/40 shrink-0" />
+              <div key={item.id || i} className="flex items-center gap-2 py-1 text-xs text-[#9ba3b4] font-mono-code truncate">
+                <span className="w-1 h-1 rounded-full bg-[#9ba3b4]/40 shrink-0" />
                 <span className="truncate">{preview || JSON.stringify(item.input).slice(0, 80)}</span>
               </div>
             );
@@ -413,7 +413,7 @@ function CopyButton({ text, label = "Copy" }: { text: string; label?: string }) 
   return (
     <button
       onClick={handleCopy}
-      className="flex items-center gap-1 text-[10px] text-cc-muted hover:text-cc-fg transition-colors cursor-pointer px-2 py-0.5 rounded-md hover:bg-cc-hover"
+      className="flex items-center gap-1 text-[10px] text-[#9ba3b4] hover:text-white transition-colors cursor-pointer px-2 py-0.5 rounded-md hover:bg-white/[0.055]"
       title="Copy to clipboard"
     >
       {copied ? (
@@ -465,7 +465,7 @@ function DownloadLink({ path, children }: { path: string; children: ReactNode })
     <button
       onClick={handleDownload}
       disabled={downloading}
-      className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-gradient-to-b from-cc-primary/12 to-cc-primary/8 text-cc-primary text-[13px] hover:from-cc-primary/20 hover:to-cc-primary/15 transition-colors border border-cc-primary/25 cursor-pointer disabled:opacity-50 shadow-[0_1px_3px_rgba(212,75,122,0.08)]"
+      className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-gradient-to-b from-[rgba(255,79,163,0.12)] to-[rgba(255,79,163,0.08)] text-[#ff4fa3] text-[13px] hover:from-[rgba(255,79,163,0.2)] hover:to-[rgba(255,79,163,0.15)] transition-colors border border-[rgba(255,79,163,0.25)] cursor-pointer disabled:opacity-50 shadow-[0_1px_3px_rgba(255,79,163,0.15)]"
     >
       {downloading ? (
         <svg className="w-3.5 h-3.5 animate-spin" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="2">
@@ -489,10 +489,10 @@ function ThinkingBlock({ text }: { text: string }) {
   const [open, setOpen] = useState(Boolean(normalized));
 
   return (
-    <div className="border border-cc-border/80 rounded-[12px] overflow-hidden bg-cc-card/80 backdrop-blur-[3px] shadow-[0_2px_8px_rgba(0,0,0,0.04),inset_0_1px_0_rgba(255,255,255,0.08)]">
+    <div className="border border-white/[0.08] rounded-[12px] overflow-hidden bg-[rgba(13,17,32,0.8)] backdrop-blur-[3px] shadow-[0_2px_12px_rgba(0,0,0,0.25),inset_0_1px_0_rgba(255,255,255,0.04)]">
       <button
         onClick={() => setOpen(!open)}
-        className="w-full flex items-center gap-2 px-3 py-2.5 text-xs text-cc-muted hover:bg-cc-hover/70 transition-colors cursor-pointer"
+        className="w-full flex items-center gap-2 px-3 py-2.5 text-xs text-[#9ba3b4] hover:bg-white/[0.04] transition-colors cursor-pointer"
       >
         <svg
           viewBox="0 0 16 16"
@@ -501,23 +501,23 @@ function ThinkingBlock({ text }: { text: string }) {
         >
           <path d="M6 4l4 4-4 4" />
         </svg>
-        <span className="inline-flex items-center justify-center w-4 h-4 rounded bg-cc-primary/10 text-cc-primary shrink-0">
+        <span className="inline-flex items-center justify-center w-4 h-4 rounded bg-[rgba(255,79,163,0.1)] text-[#ff4fa3] shrink-0">
           <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5" className="w-3 h-3">
             <path d="M8 2.5a3.5 3.5 0 013.5 3.5c0 1.3-.7 2.1-1.4 2.8-.6.6-1.1 1.1-1.1 1.7V11" strokeLinecap="round" />
             <circle cx="8" cy="13" r="0.7" fill="currentColor" stroke="none" />
             <path d="M5.3 3.8A3.5 3.5 0 004.5 6c0 1.3.7 2.1 1.4 2.8.6.6 1.1 1.1 1.1 1.7V11" strokeLinecap="round" />
           </svg>
         </span>
-        <span className="font-medium text-cc-fg">Reasoning</span>
-        <span className="text-cc-muted/60">{text.length} chars</span>
+        <span className="font-medium text-[#f6f7fb]">Reasoning</span>
+        <span className="text-[#9ba3b4]/60">{text.length} chars</span>
         {!open && preview && (
-          <span className="text-cc-muted truncate max-w-[55%]">{preview}</span>
+          <span className="text-[#9ba3b4] truncate max-w-[55%]">{preview}</span>
         )}
       </button>
       {open && (
         <div className="px-3 pb-3 pt-0">
-          <div className="border border-cc-border/70 rounded-lg px-3 py-2 bg-cc-bg/60 max-h-60 overflow-y-auto">
-            <div className="markdown-body text-[13px] text-cc-muted leading-relaxed">
+          <div className="border border-white/[0.07] rounded-lg px-3 py-2 bg-[rgba(5,7,13,0.6)] max-h-60 overflow-y-auto">
+            <div className="markdown-body text-[13px] text-[#9ba3b4] leading-relaxed">
               <Markdown
                 remarkPlugins={[remarkGfm]}
                 components={{
@@ -526,7 +526,7 @@ function ThinkingBlock({ text }: { text: string }) {
                   ol: ({ children }) => <ol className="list-decimal pl-4 mb-2 space-y-0.5">{children}</ol>,
                   li: ({ children }) => <li>{children}</li>,
                   code: ({ children }) => (
-                    <code className="px-1.5 py-0.5 rounded-md bg-cc-fg/[0.06] text-cc-fg/80 font-mono-code text-[12px]">
+                    <code className="px-1.5 py-0.5 rounded-md bg-[rgba(255,79,163,0.1)] text-[#ff8cc8] font-mono-code text-[12px]">
                       {children}
                     </code>
                   ),

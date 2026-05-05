@@ -184,7 +184,7 @@ export function SandboxManager({ embedded = false }: Props) {
         Docker
       </span>
     ) : (
-      <span className="text-[10px] px-2 py-1 rounded-md bg-amber-500/10 text-amber-500 font-medium">
+      <span className="text-[10px] px-2 py-1 rounded-md bg-pink-500/10 text-pink-500 font-medium">
         No Docker
       </span>
     );
@@ -208,8 +208,8 @@ export function SandboxManager({ embedded = false }: Props) {
               </span>
             )}
             {baseImageState?.status === "pulling" && (
-              <span className="text-[10px] px-1.5 py-0.5 rounded bg-amber-500/10 text-amber-500 flex items-center gap-1">
-                <span className="w-2.5 h-2.5 border border-amber-500/30 border-t-amber-500 rounded-full animate-spin" />
+              <span className="text-[10px] px-1.5 py-0.5 rounded bg-pink-500/10 text-pink-500 flex items-center gap-1">
+                <span className="w-2.5 h-2.5 border border-pink-500/30 border-t-pink-500 rounded-full animate-spin" />
                 Pulling...
               </span>
             )}
@@ -390,8 +390,8 @@ export function SandboxManager({ embedded = false }: Props) {
 
                       {/* Test init script result */}
                       {testingSlug === sandbox.slug && (
-                        <div className="flex items-center gap-2 px-3 py-2 rounded-lg bg-amber-500/10 text-xs text-amber-500">
-                          <span className="w-3 h-3 border-2 border-amber-500/30 border-t-amber-500 rounded-full animate-spin" />
+                        <div className="flex items-center gap-2 px-3 py-2 rounded-lg bg-pink-500/10 text-xs text-pink-500">
+                          <span className="w-3 h-3 border-2 border-pink-500/30 border-t-pink-500 rounded-full animate-spin" />
                           Testing init script...
                         </div>
                       )}

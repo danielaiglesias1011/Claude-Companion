@@ -902,12 +902,13 @@ describe("TaskPanel — barColor visual behavior via progress bars", () => {
     });
     const { container } = render(<CodexRateLimitsSection sessionId="s1" />);
     // Find the inner progress bar div (the one with width style)
+    // In new dark design, error color is bg-[#ff6b6b]
     const bar = container.querySelector("[style]");
-    expect(bar?.className).toContain("bg-cc-error");
+    expect(bar?.className).toContain("bg-[#ff6b6b]");
   });
 
   it("applies warning color class for usage between 50% and 80%", () => {
-    // Usage 51-80% should render bars with bg-cc-warning class
+    // Usage 51-80% should render bars with yellow-400 class in new dark design
     resetStore({
       sessions: new Map([["s1", {
         backend_type: "codex",
@@ -919,11 +920,11 @@ describe("TaskPanel — barColor visual behavior via progress bars", () => {
     });
     const { container } = render(<CodexRateLimitsSection sessionId="s1" />);
     const bar = container.querySelector("[style]");
-    expect(bar?.className).toContain("bg-cc-warning");
+    expect(bar?.className).toContain("bg-yellow-400");
   });
 
   it("applies primary color class for usage at or below 50%", () => {
-    // Usage <= 50% should render bars with bg-cc-primary class
+    // Usage <= 50% should render bars with bg-[#ff4fa3] (pink) in new dark design
     resetStore({
       sessions: new Map([["s1", {
         backend_type: "codex",
@@ -935,7 +936,7 @@ describe("TaskPanel — barColor visual behavior via progress bars", () => {
     });
     const { container } = render(<CodexRateLimitsSection sessionId="s1" />);
     const bar = container.querySelector("[style]");
-    expect(bar?.className).toContain("bg-cc-primary");
+    expect(bar?.className).toContain("bg-[#ff4fa3]");
   });
 });
 
@@ -1063,11 +1064,12 @@ describe("UsageLimitsSection (Claude Code sessions)", () => {
     const { container } = render(<TaskPanel sessionId="s1" />);
     await screen.findByText("5h Limit");
     const bar = container.querySelector("[style*='width: 65%']");
-    expect(bar?.className).toContain("bg-cc-warning");
+    // In new dark design, warning color is bg-yellow-400
+    expect(bar?.className).toContain("bg-yellow-400");
   });
 
   it("applies error bar color for 5h usage above 80", async () => {
-    // Usage at 95% should render with bg-cc-error
+    // Usage at 95% should render with bg-[#ff6b6b] in new dark design
     mockApi.getSessionUsageLimits.mockResolvedValueOnce({
       five_hour: { utilization: 95, resets_at: null },
       seven_day: null,
@@ -1079,7 +1081,8 @@ describe("UsageLimitsSection (Claude Code sessions)", () => {
     const { container } = render(<TaskPanel sessionId="s1" />);
     await screen.findByText("5h Limit");
     const bar = container.querySelector("[style*='width: 95%']");
-    expect(bar?.className).toContain("bg-cc-error");
+    // In new dark design, error color is bg-[#ff6b6b]
+    expect(bar?.className).toContain("bg-[#ff6b6b]");
   });
 
   it("caps the bar width at 100% even when utilization exceeds 100", async () => {

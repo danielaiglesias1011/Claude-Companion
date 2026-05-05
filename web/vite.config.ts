@@ -39,6 +39,7 @@ export default defineConfig({
     host: "0.0.0.0",
     port: 5174,
     strictPort: false,
+    allowedHosts: ["claude-companion.basg.envzy.com"],
     proxy: {
       "/api": "http://localhost:3457",
       "/ws": {

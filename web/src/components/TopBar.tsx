@@ -133,14 +133,14 @@ export function TopBar() {
   }, [showWorkspaceControls, workspaceTabs, activeTab, cwd, quickTerminalOpen, quickTerminalTabs.length, openQuickTerminal, defaultTerminalOpts, setActiveTab, markChatTabReentry, currentSessionId]);
 
   return (
-    <header className="relative shrink-0 h-11 px-4 bg-cc-bg/95 backdrop-blur-sm border-b border-cc-separator">
+    <header className="relative shrink-0 h-12 px-4 bg-[rgba(5,7,13,0.85)] backdrop-blur-xl border-b border-white/[0.07]">
       <div className="h-full flex items-center gap-1 min-w-0">
         <button
           onClick={() => setSidebarOpen(!sidebarOpen)}
           className={`flex items-center justify-center w-8 h-8 rounded-md transition-colors cursor-pointer shrink-0 ${
             sidebarOpen
-              ? "text-cc-primary bg-cc-active"
-              : "text-cc-muted hover:text-cc-fg hover:bg-cc-hover"
+              ? "text-[#ff4fa3] bg-[rgba(255,79,163,0.12)]"
+              : "text-[#9ba3b4] hover:text-white hover:bg-white/[0.055]"
           }`}
           aria-label="Toggle sidebar"
         >
@@ -154,37 +154,37 @@ export function TopBar() {
           <div className="flex-1 flex items-center justify-start md:justify-center gap-0.5 min-w-0 overflow-x-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
               <button
                 onClick={() => activateWorkspaceTab("chat")}
-                className={`h-full px-3 text-[12px] font-medium transition-colors cursor-pointer flex items-center gap-1.5 border-b-[1.5px] shrink-0 ${
+                className={`relative h-full px-3 text-[12px] font-medium transition-colors cursor-pointer flex items-center gap-1.5 shrink-0 ${
                   activeTab === "chat"
-                    ? "text-cc-fg border-cc-primary"
-                    : "text-cc-muted hover:text-cc-fg border-transparent"
+                    ? "text-white after:absolute after:bottom-0 after:left-2 after:right-2 after:h-px after:bg-[#ff4fa3] after:shadow-[0_0_8px_rgba(255,79,163,0.8)]"
+                    : "text-[#9ba3b4] hover:text-[#c4c9d6]"
                 }`}
                 title={sessionName || "Session"}
                 aria-label="Session tab"
               >
                   <span className={`w-1.5 h-1.5 rounded-full shrink-0 ${
                     !isConnected
-                      ? "bg-cc-muted opacity-45"
+                      ? "bg-[#9ba3b4] opacity-45"
                       : status === "running"
-                        ? "bg-cc-primary"
+                        ? "bg-[#ff4fa3] shadow-[0_0_6px_rgba(255,79,163,0.8)]"
                         : status === "compacting"
-                          ? "bg-cc-warning"
-                          : "bg-cc-success"
+                          ? "bg-yellow-400"
+                          : "bg-[#42f59b]"
                   }`} />
                   Session
               </button>
               <button
                 onClick={() => activateWorkspaceTab("diff")}
-                className={`h-full px-3 text-[12px] font-medium transition-colors cursor-pointer flex items-center gap-1.5 border-b-[1.5px] shrink-0 ${
+                className={`relative h-full px-3 text-[12px] font-medium transition-colors cursor-pointer flex items-center gap-1.5 shrink-0 ${
                   activeTab === "diff"
-                    ? "text-cc-fg border-cc-primary"
-                    : "text-cc-muted hover:text-cc-fg border-transparent"
+                    ? "text-white after:absolute after:bottom-0 after:left-2 after:right-2 after:h-px after:bg-[#ff4fa3] after:shadow-[0_0_8px_rgba(255,79,163,0.8)]"
+                    : "text-[#9ba3b4] hover:text-[#c4c9d6]"
                 }`}
                 aria-label="Diffs tab"
               >
                 Diffs
                 {changedFilesCount > 0 && (
-                  <span className="text-[9px] rounded-full min-w-[15px] h-[15px] px-1 flex items-center justify-center font-semibold leading-none bg-amber-100 text-amber-700 dark:bg-amber-900/60 dark:text-amber-300">
+                  <span className="text-[9px] rounded-full min-w-[15px] h-[15px] px-1 flex items-center justify-center font-semibold leading-none bg-[rgba(255,79,163,0.2)] text-[#ff4fa3]">
                     {changedFilesCount}
                   </span>
                 )}
@@ -192,12 +192,12 @@ export function TopBar() {
               <button
                 onClick={() => activateWorkspaceTab("terminal")}
                 disabled={!cwd}
-                className={`h-full px-3 text-[12px] font-medium transition-colors flex items-center border-b-[1.5px] shrink-0 ${
+                className={`relative h-full px-3 text-[12px] font-medium transition-colors flex items-center shrink-0 ${
                   !cwd
-                    ? "text-cc-muted/50 border-transparent cursor-not-allowed"
+                    ? "text-[#9ba3b4]/50 cursor-not-allowed"
                     : activeTab === "terminal"
-                      ? "text-cc-fg border-cc-primary cursor-pointer"
-                      : "text-cc-muted hover:text-cc-fg border-transparent cursor-pointer"
+                      ? "text-white cursor-pointer after:absolute after:bottom-0 after:left-2 after:right-2 after:h-px after:bg-[#ff4fa3] after:shadow-[0_0_8px_rgba(255,79,163,0.8)]"
+                      : "text-[#9ba3b4] hover:text-[#c4c9d6] cursor-pointer"
                 }`}
                 title={terminalButtonTitle}
                 aria-label="Shell tab"
@@ -206,16 +206,16 @@ export function TopBar() {
               </button>
               <button
                 onClick={() => activateWorkspaceTab("processes")}
-                className={`h-full px-3 text-[12px] font-medium transition-colors cursor-pointer flex items-center gap-1.5 border-b-[1.5px] shrink-0 ${
+                className={`relative h-full px-3 text-[12px] font-medium transition-colors cursor-pointer flex items-center gap-1.5 shrink-0 ${
                   activeTab === "processes"
-                    ? "text-cc-fg border-cc-primary"
-                    : "text-cc-muted hover:text-cc-fg border-transparent"
+                    ? "text-white after:absolute after:bottom-0 after:left-2 after:right-2 after:h-px after:bg-[#ff4fa3] after:shadow-[0_0_8px_rgba(255,79,163,0.8)]"
+                    : "text-[#9ba3b4] hover:text-[#c4c9d6]"
                 }`}
                 aria-label="Processes tab"
               >
                 Processes
                 {runningProcessCount > 0 && (
-                  <span className="text-[9px] rounded-full min-w-[15px] h-[15px] px-1 flex items-center justify-center font-semibold leading-none bg-blue-100 text-blue-700 dark:bg-blue-900/60 dark:text-blue-300">
+                  <span className="text-[9px] rounded-full min-w-[15px] h-[15px] px-1 flex items-center justify-center font-semibold leading-none bg-blue-500/20 text-blue-400">
                     {runningProcessCount}
                   </span>
                 )}
@@ -223,12 +223,12 @@ export function TopBar() {
               <button
                 onClick={() => activateWorkspaceTab("editor")}
                 disabled={!cwd}
-                className={`h-full px-3 text-[12px] font-medium transition-colors flex items-center border-b-[1.5px] shrink-0 ${
+                className={`relative h-full px-3 text-[12px] font-medium transition-colors flex items-center shrink-0 ${
                   !cwd
-                    ? "text-cc-muted/50 border-transparent cursor-not-allowed"
+                    ? "text-[#9ba3b4]/50 cursor-not-allowed"
                     : activeTab === "editor"
-                      ? "text-cc-fg border-cc-primary cursor-pointer"
-                      : "text-cc-muted hover:text-cc-fg border-transparent cursor-pointer"
+                      ? "text-white cursor-pointer after:absolute after:bottom-0 after:left-2 after:right-2 after:h-px after:bg-[#ff4fa3] after:shadow-[0_0_8px_rgba(255,79,163,0.8)]"
+                      : "text-[#9ba3b4] hover:text-[#c4c9d6] cursor-pointer"
                 }`}
                 title={!cwd ? "Editor unavailable while session is reconnecting" : "Editor"}
                 aria-label="Editor tab"
@@ -237,10 +237,10 @@ export function TopBar() {
               </button>
               <button
                 onClick={() => activateWorkspaceTab("browser")}
-                className={`h-full px-3 text-[12px] font-medium transition-colors cursor-pointer flex items-center border-b-[1.5px] shrink-0 ${
+                className={`relative h-full px-3 text-[12px] font-medium transition-colors cursor-pointer flex items-center shrink-0 ${
                   activeTab === "browser"
-                    ? "text-cc-fg border-cc-primary"
-                    : "text-cc-muted hover:text-cc-fg border-transparent"
+                    ? "text-white after:absolute after:bottom-0 after:left-2 after:right-2 after:h-px after:bg-[#ff4fa3] after:shadow-[0_0_8px_rgba(255,79,163,0.8)]"
+                    : "text-[#9ba3b4] hover:text-[#c4c9d6]"
                 }`}
                 title="Browser preview"
                 aria-label="Browser tab"
@@ -260,8 +260,8 @@ export function TopBar() {
               onClick={() => setTaskPanelOpen(!taskPanelOpen)}
               className={`flex items-center justify-center w-8 h-8 rounded-md transition-colors cursor-pointer ${
                 taskPanelOpen
-                  ? "text-cc-primary bg-cc-active"
-                  : "text-cc-muted hover:text-cc-fg hover:bg-cc-hover"
+                  ? "text-[#ff4fa3] bg-[rgba(255,79,163,0.12)]"
+                  : "text-[#9ba3b4] hover:text-white hover:bg-white/[0.055]"
               }`}
               title="Toggle context panel"
               aria-label="Toggle context panel"
@@ -286,7 +286,7 @@ function ThemeToggle() {
   return (
     <button
       onClick={toggle}
-      className="flex items-center justify-center w-8 h-8 rounded-md text-cc-muted hover:text-cc-fg hover:bg-cc-hover transition-colors cursor-pointer"
+      className="flex items-center justify-center w-8 h-8 rounded-md text-[#9ba3b4] hover:text-white hover:bg-white/[0.055] transition-colors cursor-pointer"
       title={darkMode ? "Switch to light mode" : "Switch to dark mode"}
       aria-label={darkMode ? "Switch to light mode" : "Switch to dark mode"}
     >

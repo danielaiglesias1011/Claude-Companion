@@ -1,5 +1,6 @@
 // @vitest-environment jsdom
 import { render, screen, fireEvent } from "@testing-library/react";
+import { vi } from "vitest";
 import { ToolBlock, ToolIcon, getToolIcon, getToolLabel, getPreview } from "./ToolBlock.js";
 
 // ─── getToolIcon ─────────────────────────────────────────────────────────────
@@ -368,6 +369,66 @@ describe("ToolBlock", () => {
 
     fireEvent.click(screen.getByRole("button"));
     expect(screen.getByText("/home/user/test.txt")).toBeTruthy();
+  });
+
+  it("renders Write file path and Download button when expanded", () => {
+    // Verifies the download affordance is visible when a Write tool block is opened
+    render(
+      <ToolBlock
+        name="Write"
+        input={{ file_path: "/home/user/output.txt", content: "hello world" }}
+        toolUseId="tool-write-1"
+      />
+    );
+
+    fireEvent.click(screen.getByRole("button", { name: /write file/i }));
+
+    expect(screen.getByText("/home/user/output.txt")).toBeTruthy();
+    expect(screen.getByRole("button", { name: /download output\.txt/i })).toBeTruthy();
+  });
+
+  it("triggers a file download with the correct filename when Download is clicked", () => {
+    // Verifies the Blob-based download uses the basename of file_path as the download attribute.
+    // jsdom doesn't implement URL.createObjectURL — assign stubs directly so the rest of the
+    // URL API (constructor, parse, etc.) remains intact.
+    const createObjectURL = vi.fn(() => "blob:fake-url");
+    const revokeObjectURL = vi.fn();
+    const urlProto = URL as unknown as Record<string, unknown>;
+    const savedCreateObjectURL = urlProto["createObjectURL"];
+    const savedRevokeObjectURL = urlProto["revokeObjectURL"];
+    urlProto["createObjectURL"] = createObjectURL;
+    urlProto["revokeObjectURL"] = revokeObjectURL;
+
+    const clickSpy = vi.fn();
+    const fakeAnchor = { href: "", download: "", click: clickSpy };
+
+    render(
+      <ToolBlock
+        name="Write"
+        input={{ file_path: "/tmp/report.csv", content: "a,b,c" }}
+        toolUseId="tool-write-2"
+      />
+    );
+
+    // Expand first so React finishes any createElement calls before we spy
+    fireEvent.click(screen.getByRole("button", { name: /write file/i }));
+
+    // Set up spy after expansion — the only remaining createElement("a") is from handleDownload
+    const originalCreateElement = document.createElement.bind(document);
+    vi.spyOn(document, "createElement").mockImplementation(
+      (tag: string) => tag === "a" ? (fakeAnchor as unknown as HTMLElement) : originalCreateElement(tag)
+    );
+
+    fireEvent.click(screen.getByRole("button", { name: /download report\.csv/i }));
+
+    expect(createObjectURL).toHaveBeenCalledOnce();
+    expect(fakeAnchor.download).toBe("report.csv");
+    expect(clickSpy).toHaveBeenCalledOnce();
+    expect(revokeObjectURL).toHaveBeenCalledWith("blob:fake-url");
+
+    urlProto["createObjectURL"] = savedCreateObjectURL;
+    urlProto["revokeObjectURL"] = savedRevokeObjectURL;
+    vi.restoreAllMocks();
   });
 
   it("renders JSON for unknown tools when expanded", () => {

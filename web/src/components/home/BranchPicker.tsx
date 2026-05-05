@@ -143,7 +143,7 @@ export function BranchPicker({
                                 <span className="text-[9px] text-green-500">{b.ahead}&#8593;</span>
                               )}
                               {b.behind > 0 && (
-                                <span className="text-[9px] text-amber-500">{b.behind}&#8595;</span>
+                                <span className="text-[9px] text-pink-500">{b.behind}&#8595;</span>
                               )}
                               {b.worktreePath && (
                                 <span className="text-[9px] px-1 py-0.5 rounded bg-blue-500/15 text-blue-600 dark:text-blue-400">wt</span>

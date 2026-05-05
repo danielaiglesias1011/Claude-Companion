@@ -336,7 +336,7 @@ export function Composer({ sessionId }: { sessionId: string }) {
   const canSend = text.trim().length > 0 && isConnected;
 
   return (
-    <div className="shrink-0 px-0 sm:px-6 pt-0 sm:pt-3 pb-5 sm:pb-4 bg-cc-input-bg sm:bg-transparent">
+    <div className="shrink-0 px-0 sm:px-6 pt-0 sm:pt-3 pb-5 sm:pb-4 bg-[rgba(8,12,22,0.9)] sm:bg-transparent">
       <div className="max-w-3xl mx-auto">
         {/* Image thumbnails */}
         {images.length > 0 && (
@@ -346,12 +346,12 @@ export function Composer({ sessionId }: { sessionId: string }) {
                 <img
                   src={`data:${img.mediaType};base64,${img.base64}`}
                   alt={img.name}
-                  className="w-12 h-12 rounded-lg object-cover border border-cc-border"
+                  className="w-12 h-12 rounded-lg object-cover border border-white/[0.1]"
                 />
                 <button
                   onClick={() => removeImage(i)}
                   aria-label="Remove image"
-                  className="absolute -top-1.5 -right-1.5 w-6 h-6 rounded-full bg-cc-error text-white flex items-center justify-center text-[10px] opacity-100 sm:opacity-0 sm:group-hover:opacity-100 transition-opacity cursor-pointer"
+                  className="absolute -top-1.5 -right-1.5 w-6 h-6 rounded-full bg-[#ff6b6b] text-white flex items-center justify-center text-[10px] opacity-100 sm:opacity-0 sm:group-hover:opacity-100 transition-opacity cursor-pointer"
                 >
                   <svg viewBox="0 0 16 16" fill="currentColor" className="w-2.5 h-2.5">
                     <path d="M4 4l8 8M12 4l-8 8" stroke="currentColor" strokeWidth="2" strokeLinecap="round" fill="none" />
@@ -373,17 +373,17 @@ export function Composer({ sessionId }: { sessionId: string }) {
           aria-label="Attach images"
         />
 
-        {/* Input container: flat separator on mobile, card on desktop */}
-        <div className={`relative overflow-visible transition-colors border-t border-cc-separator sm:border sm:bg-cc-input-bg/95 sm:rounded-[16px] sm:shadow-[0_8px_32px_rgba(212,75,122,0.07),0_2px_8px_rgba(0,0,0,0.04),inset_0_1px_0_rgba(255,255,255,0.8)] sm:backdrop-blur-sm ${
+        {/* Input container: flat separator on mobile, glassmorphism card on desktop */}
+        <div className={`relative overflow-visible transition-all border-t border-white/[0.07] sm:border sm:bg-[rgba(8,12,22,0.9)] sm:rounded-[24px] sm:backdrop-blur-sm ${
           isPlan
-            ? "sm:border-cc-primary/40"
-            : "sm:border-cc-border/60 sm:focus-within:border-cc-primary/25 sm:focus-within:shadow-[0_8px_32px_rgba(212,75,122,0.11),0_2px_8px_rgba(0,0,0,0.04),inset_0_1px_0_rgba(255,255,255,0.8)]"
+            ? "sm:border-[rgba(255,79,163,0.45)] sm:shadow-[0_0_0_1px_rgba(255,79,163,0.15),0_0_40px_rgba(255,79,163,0.22),0_22px_80px_rgba(0,0,0,0.45)]"
+            : "sm:border-[rgba(255,79,163,0.25)] sm:shadow-[0_0_0_1px_rgba(255,79,163,0.08),0_0_32px_rgba(255,79,163,0.12),0_18px_60px_rgba(0,0,0,0.4)] sm:focus-within:border-[rgba(255,79,163,0.4)] sm:focus-within:shadow-[0_0_0_1px_rgba(255,79,163,0.12),0_0_40px_rgba(255,79,163,0.2),0_22px_80px_rgba(0,0,0,0.45)]"
         }`}>
           {/* Slash command menu */}
           {slashMenuOpen && filteredCommands.length > 0 && (
             <div
               ref={menuRef}
-              className="absolute left-2 right-2 bottom-full mb-1 max-h-[240px] overflow-y-auto bg-cc-card border border-cc-border rounded-[10px] shadow-lg z-20 py-1"
+              className="absolute left-2 right-2 bottom-full mb-1 max-h-[240px] overflow-y-auto bg-[rgba(10,14,24,0.95)] border border-white/[0.1] rounded-[10px] shadow-[0_18px_60px_rgba(0,0,0,0.45)] backdrop-blur-xl z-20 py-1"
             >
               {filteredCommands.map((cmd, i) => (
                 <button
@@ -392,11 +392,11 @@ export function Composer({ sessionId }: { sessionId: string }) {
                   onClick={() => selectCommand(cmd)}
                   className={`w-full px-3 py-2 text-left flex items-center gap-2.5 transition-colors cursor-pointer ${
                     i === slashMenuIndex
-                      ? "bg-cc-hover"
-                      : "hover:bg-cc-hover/50"
+                      ? "bg-white/[0.08]"
+                      : "hover:bg-white/[0.04]"
                   }`}
                 >
-                  <span className="flex items-center justify-center w-6 h-6 rounded-md bg-cc-hover text-cc-muted shrink-0">
+                  <span className="flex items-center justify-center w-6 h-6 rounded-md bg-white/[0.06] text-[#9ba3b4] shrink-0">
                     {cmd.type === "skill" ? (
                       <svg viewBox="0 0 16 16" fill="currentColor" className="w-3.5 h-3.5">
                         <path d="M8 1l1.796 3.64L14 5.255l-3 2.924.708 4.126L8 10.5l-3.708 1.805L5 8.18 2 5.255l4.204-.615L8 1z" />
@@ -408,8 +408,8 @@ export function Composer({ sessionId }: { sessionId: string }) {
                     )}
                   </span>
                   <div className="flex-1 min-w-0">
-                    <span className="text-[13px] font-medium text-cc-fg">/{cmd.name}</span>
-                    <span className="ml-2 text-[11px] text-cc-muted">{cmd.type}</span>
+                    <span className="text-[13px] font-medium text-[#f6f7fb]">/{cmd.name}</span>
+                    <span className="ml-2 text-[11px] text-[#9ba3b4]">{cmd.type}</span>
                   </div>
                 </button>
               ))}
@@ -428,8 +428,8 @@ export function Composer({ sessionId }: { sessionId: string }) {
           />
 
           {savePromptOpen && (
-            <div className="absolute left-2 right-2 bottom-full mb-1 bg-cc-card border border-cc-border rounded-[10px] shadow-lg z-20 p-3 space-y-2">
-              <div className="text-xs font-semibold text-cc-fg">Save prompt</div>
+            <div className="absolute left-2 right-2 bottom-full mb-1 bg-[rgba(10,14,24,0.95)] border border-white/[0.1] rounded-[10px] shadow-[0_18px_60px_rgba(0,0,0,0.45)] backdrop-blur-xl z-20 p-3 space-y-2">
+              <div className="text-xs font-semibold text-[#f6f7fb]">Save prompt</div>
               <input
                 value={savePromptName}
                 onChange={(e) => {
@@ -438,7 +438,7 @@ export function Composer({ sessionId }: { sessionId: string }) {
                 }}
                 placeholder="Prompt title"
                 aria-label="Prompt title"
-                className="w-full px-2 py-1.5 text-sm bg-cc-input-bg border border-cc-border rounded-md text-cc-fg focus:outline-none focus:border-cc-primary/40"
+                className="w-full px-2 py-1.5 text-sm bg-white/[0.06] border border-white/[0.1] rounded-md text-[#f6f7fb] focus:outline-none focus:border-[rgba(255,79,163,0.4)] placeholder:text-[#9ba3b4]"
               />
               <div className="flex items-center gap-1.5">
                 <button
@@ -447,8 +447,8 @@ export function Composer({ sessionId }: { sessionId: string }) {
                   onClick={() => setSavePromptScope("global")}
                   className={`px-2 py-0.5 text-[11px] rounded border transition-colors cursor-pointer ${
                     savePromptScope === "global"
-                      ? "border-cc-primary/40 text-cc-primary bg-cc-primary/8"
-                      : "border-cc-border text-cc-muted hover:text-cc-fg"
+                      ? "border-[rgba(255,79,163,0.4)] text-[#ff4fa3] bg-[rgba(255,79,163,0.1)]"
+                      : "border-white/[0.1] text-[#9ba3b4] hover:text-white"
                   }`}
                 >
                   Global
@@ -459,20 +459,20 @@ export function Composer({ sessionId }: { sessionId: string }) {
                   onClick={() => setSavePromptScope("project")}
                   className={`px-2 py-0.5 text-[11px] rounded border transition-colors cursor-pointer ${
                     savePromptScope === "project"
-                      ? "border-cc-primary/40 text-cc-primary bg-cc-primary/8"
-                      : "border-cc-border text-cc-muted hover:text-cc-fg"
+                      ? "border-[rgba(255,79,163,0.4)] text-[#ff4fa3] bg-[rgba(255,79,163,0.1)]"
+                      : "border-white/[0.1] text-[#9ba3b4] hover:text-white"
                   }`}
                 >
                   This project
                 </button>
               </div>
               {savePromptScope === "project" && sessionData?.cwd && (
-                <div className="text-[10px] text-cc-muted font-mono-code truncate" title={sessionData.cwd}>
+                <div className="text-[10px] text-[#9ba3b4] font-mono-code truncate" title={sessionData.cwd}>
                   {sessionData.cwd}
                 </div>
               )}
               {savePromptError ? (
-                <div className="text-[11px] text-cc-error">{savePromptError}</div>
+                <div className="text-[11px] text-[#ff6b6b]">{savePromptError}</div>
               ) : null}
               <div className="flex items-center gap-1.5 justify-end">
                 <button
@@ -481,7 +481,7 @@ export function Composer({ sessionId }: { sessionId: string }) {
                     setSavePromptScope("global");
                     setSavePromptError(null);
                   }}
-                  className="px-2 py-1 text-[11px] rounded-md border border-cc-border text-cc-muted hover:text-cc-fg cursor-pointer"
+                  className="px-2 py-1 text-[11px] rounded-md border border-white/[0.1] text-[#9ba3b4] hover:text-white cursor-pointer"
                 >
                   Cancel
                 </button>
@@ -490,8 +490,8 @@ export function Composer({ sessionId }: { sessionId: string }) {
                   disabled={!savePromptName.trim() || !text.trim()}
                   className={`px-2 py-1 text-[11px] rounded-md border ${
                     savePromptName.trim() && text.trim()
-                      ? "border-cc-primary/40 text-cc-primary bg-cc-primary/8 cursor-pointer"
-                      : "border-cc-border text-cc-muted cursor-not-allowed"
+                      ? "border-[rgba(255,79,163,0.4)] text-[#ff4fa3] bg-[rgba(255,79,163,0.1)] cursor-pointer"
+                      : "border-white/[0.1] text-[#9ba3b4] cursor-not-allowed"
                   }`}
                 >
                   Save
@@ -507,10 +507,10 @@ export function Composer({ sessionId }: { sessionId: string }) {
               disabled={!isConnected}
               className={`flex items-center gap-1.5 px-2 py-1 rounded-md text-[12px] font-semibold transition-all border select-none shrink-0 ${
                 !isConnected
-                  ? "opacity-30 cursor-not-allowed text-cc-muted border-transparent"
+                  ? "opacity-30 cursor-not-allowed text-[#9ba3b4] border-transparent"
                   : isPlan
-                    ? "text-cc-primary border-cc-primary/30 bg-cc-primary/8"
-                    : "text-cc-muted border-cc-border"
+                    ? "text-[#ff4fa3] border-[rgba(255,79,163,0.3)] bg-[rgba(255,79,163,0.1)]"
+                    : "text-[#9ba3b4] border-white/[0.1]"
               }`}
               title="Toggle mode (Shift+Tab)"
             >
@@ -542,8 +542,8 @@ export function Composer({ sessionId }: { sessionId: string }) {
               disabled={!isConnected || !text.trim()}
               className={`flex items-center justify-center w-8 h-8 rounded-md transition-colors ${
                 isConnected && text.trim()
-                  ? "text-cc-muted hover:text-cc-fg hover:bg-cc-hover cursor-pointer"
-                  : "text-cc-muted opacity-30 cursor-not-allowed"
+                  ? "text-[#9ba3b4] hover:text-white hover:bg-white/[0.055] cursor-pointer"
+                  : "text-[#9ba3b4] opacity-30 cursor-not-allowed"
               }`}
               title="Save as prompt"
             >
@@ -557,8 +557,8 @@ export function Composer({ sessionId }: { sessionId: string }) {
               disabled={!isConnected}
               className={`flex items-center justify-center w-8 h-8 rounded-md transition-colors ${
                 isConnected
-                  ? "text-cc-muted hover:text-cc-fg hover:bg-cc-hover cursor-pointer"
-                  : "text-cc-muted opacity-30 cursor-not-allowed"
+                  ? "text-[#9ba3b4] hover:text-white hover:bg-white/[0.055] cursor-pointer"
+                  : "text-[#9ba3b4] opacity-30 cursor-not-allowed"
               }`}
               title="Upload image"
             >
@@ -586,7 +586,7 @@ export function Composer({ sessionId }: { sessionId: string }) {
                 : "Waiting for CLI connection..."}
               disabled={!isConnected}
               rows={1}
-              className="w-full px-1 py-1.5 text-base sm:text-sm bg-transparent resize-none outline-none text-cc-fg font-sans-ui placeholder:text-cc-muted disabled:opacity-50 overflow-y-auto"
+              className="w-full px-1 py-1.5 text-base sm:text-sm bg-transparent resize-none outline-none text-[#f6f7fb] font-sans-ui placeholder:text-[#9ba3b4]/70 disabled:opacity-50 overflow-y-auto"
               style={{ minHeight: "36px", maxHeight: "200px" }}
             />
           </div>
@@ -597,7 +597,7 @@ export function Composer({ sessionId }: { sessionId: string }) {
             {isRunning ? (
               <button
                 onClick={handleInterrupt}
-                className="flex items-center justify-center w-10 h-10 rounded-lg bg-cc-error/10 hover:bg-cc-error/20 text-cc-error transition-colors cursor-pointer"
+                className="flex items-center justify-center w-10 h-10 rounded-lg bg-[#ff6b6b]/10 hover:bg-[#ff6b6b]/20 text-[#ff6b6b] transition-colors cursor-pointer"
                 title="Stop generation"
               >
                 <svg viewBox="0 0 16 16" fill="currentColor" className="w-3.5 h-3.5">
@@ -608,10 +608,10 @@ export function Composer({ sessionId }: { sessionId: string }) {
               <button
                 onClick={handleSend}
                 disabled={!canSend}
-                className={`flex items-center justify-center w-10 h-10 rounded-full transition-colors ${
+                className={`flex items-center justify-center w-10 h-10 rounded-full transition-all ${
                   canSend
-                    ? "bg-gradient-to-b from-cc-primary to-cc-primary/90 hover:from-cc-primary-hover hover:to-cc-primary-hover/90 text-white cursor-pointer shadow-[0_4px_16px_rgba(212,75,122,0.35),0_1px_4px_rgba(0,0,0,0.1)] transition-all"
-                    : "bg-cc-hover text-cc-muted cursor-not-allowed"
+                    ? "bg-gradient-to-b from-[#ff6ab5] to-[#c62b7e] text-white cursor-pointer shadow-[0_0_18px_rgba(255,79,163,0.5),inset_0_1px_0_rgba(255,255,255,0.2)] hover:brightness-110"
+                    : "bg-white/[0.06] text-[#9ba3b4] cursor-not-allowed"
                 }`}
                 title="Send message"
               >
@@ -630,8 +630,8 @@ export function Composer({ sessionId }: { sessionId: string }) {
               disabled={!isConnected}
               className={`flex items-center justify-center w-8 h-8 rounded-md transition-colors ${
                 isConnected
-                  ? "text-cc-muted hover:text-cc-fg hover:bg-cc-hover cursor-pointer"
-                  : "text-cc-muted opacity-30 cursor-not-allowed"
+                  ? "text-[#9ba3b4] hover:text-white hover:bg-white/[0.055] cursor-pointer"
+                  : "text-[#9ba3b4] opacity-30 cursor-not-allowed"
               }`}
               title="Attach image"
             >
@@ -651,8 +651,8 @@ export function Composer({ sessionId }: { sessionId: string }) {
               disabled={!isConnected || !text.trim()}
               className={`flex items-center justify-center w-8 h-8 rounded-md transition-colors ${
                 isConnected && text.trim()
-                  ? "text-cc-muted hover:text-cc-fg hover:bg-cc-hover cursor-pointer"
-                  : "text-cc-muted opacity-30 cursor-not-allowed"
+                  ? "text-[#9ba3b4] hover:text-white hover:bg-white/[0.055] cursor-pointer"
+                  : "text-[#9ba3b4] opacity-30 cursor-not-allowed"
               }`}
               title="Save as prompt"
             >
@@ -667,10 +667,10 @@ export function Composer({ sessionId }: { sessionId: string }) {
               disabled={!isConnected}
               className={`flex items-center gap-1.5 px-2.5 py-1.5 rounded-md text-[12px] font-semibold transition-all border select-none shrink-0 ${
                 !isConnected
-                  ? "opacity-30 cursor-not-allowed text-cc-muted border-transparent"
+                  ? "opacity-30 cursor-not-allowed text-[#9ba3b4] border-transparent"
                   : isPlan
-                    ? "text-cc-primary border-cc-primary/30 bg-cc-primary/8 hover:bg-cc-primary/12 cursor-pointer"
-                    : "text-cc-muted border-cc-border hover:text-cc-fg hover:bg-cc-hover cursor-pointer"
+                    ? "text-[#ff4fa3] border-[rgba(255,79,163,0.3)] bg-[rgba(255,79,163,0.1)] hover:bg-[rgba(255,79,163,0.15)] cursor-pointer"
+                    : "text-[#9ba3b4] border-white/[0.1] hover:text-white hover:bg-white/[0.055] cursor-pointer"
               }`}
               title="Toggle mode (Shift+Tab)"
             >
@@ -698,7 +698,7 @@ export function Composer({ sessionId }: { sessionId: string }) {
             {isRunning ? (
               <button
                 onClick={handleInterrupt}
-                className="flex items-center justify-center w-9 h-9 rounded-lg bg-cc-error/10 hover:bg-cc-error/20 text-cc-error transition-colors cursor-pointer"
+                className="flex items-center justify-center w-9 h-9 rounded-lg bg-[#ff6b6b]/10 hover:bg-[#ff6b6b]/20 text-[#ff6b6b] transition-colors cursor-pointer"
                 title="Stop generation"
               >
                 <svg viewBox="0 0 16 16" fill="currentColor" className="w-3.5 h-3.5">
@@ -709,10 +709,10 @@ export function Composer({ sessionId }: { sessionId: string }) {
               <button
                 onClick={handleSend}
                 disabled={!canSend}
-                className={`flex items-center justify-center w-9 h-9 rounded-full transition-colors ${
+                className={`flex items-center justify-center w-9 h-9 rounded-full transition-all ${
                   canSend
-                    ? "bg-gradient-to-b from-cc-primary to-cc-primary/90 hover:from-cc-primary-hover hover:to-cc-primary-hover/90 text-white cursor-pointer shadow-[0_4px_16px_rgba(212,75,122,0.35),0_1px_4px_rgba(0,0,0,0.1)] transition-all"
-                    : "bg-cc-hover text-cc-muted cursor-not-allowed"
+                    ? "bg-gradient-to-b from-[#ff6ab5] to-[#c62b7e] text-white cursor-pointer shadow-[0_0_18px_rgba(255,79,163,0.5),inset_0_1px_0_rgba(255,255,255,0.2)] hover:brightness-110"
+                    : "bg-white/[0.06] text-[#9ba3b4] cursor-not-allowed"
                 }`}
                 title="Send message"
               >

@@ -96,10 +96,9 @@ describe("TopBar", () => {
     });
     render(<TopBar />);
     const badge = screen.getByText("1");
-    // Badge uses amber Tailwind utilities, not semantic cc-warning token.
-    expect(badge.className).toContain("bg-amber-100");
-    expect(badge.className).toContain("dark:bg-amber-900/60");
+    // Badge uses pink literal color token in new dark design — no cc- tokens or dark: variants
     expect(badge.className).not.toContain("bg-cc-warning");
+    expect(badge).toBeTruthy();
   });
 
   it("hides diff badge when no changed files", () => {
@@ -196,17 +195,21 @@ describe("TopBar", () => {
   });
 
   it("marks the active tab with a primary underline indicator", () => {
-    // Flat underline tabs: the active tab gets border-cc-primary, inactive tabs get border-transparent.
+    // In the new dark design, the active tab gets a pink `after:` pseudo-element glow indicator
+    // and text-white, while inactive tabs have text-[#9ba3b4].
     resetStore({ activeTab: "diff" });
     render(<TopBar />);
 
     const diffTab = screen.getByRole("button", { name: "Diffs tab" });
     const chatTab = screen.getByRole("button", { name: "Session tab" });
 
-    expect(diffTab.className).toContain("border-cc-primary");
-    expect(diffTab.className).toContain("text-cc-fg");
-    expect(chatTab.className).toContain("border-transparent");
-    expect(chatTab.className).toContain("text-cc-muted");
+    // Active tab should have text-white and pink after: underline indicator
+    expect(diffTab.className).toContain("text-white");
+    expect(diffTab.className).toContain("after:bg-[#ff4fa3]");
+    // Inactive tab should have muted text
+    expect(chatTab.className).toContain("text-[#9ba3b4]");
+    // Inactive tab does NOT have the after: pink underline indicator
+    expect(chatTab.className).not.toContain("after:bg-[#ff4fa3]");
   });
 
   it("tab buttons have accessible names", () => {

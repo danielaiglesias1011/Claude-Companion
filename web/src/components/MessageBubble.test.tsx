@@ -210,8 +210,8 @@ describe("MessageBubble - assistant messages", () => {
     const { container } = render(<MessageBubble message={msg} />);
 
     expect(screen.getByText("Error: file not found")).toBeTruthy();
-    // Check for error styling class
-    const errorDiv = container.querySelector(".text-cc-error");
+    // Check for error styling class — now uses literal color instead of cc- token
+    const errorDiv = container.querySelector(".text-\\[\\#ff6b6b\\]");
     expect(errorDiv).toBeTruthy();
   });
 
@@ -227,8 +227,9 @@ describe("MessageBubble - assistant messages", () => {
 
     expect(screen.getByText("Success output")).toBeTruthy();
     const resultDiv = screen.getByText("Success output");
-    expect(resultDiv.className).toContain("text-cc-muted");
-    expect(resultDiv.className).not.toContain("text-cc-error");
+    // Now uses literal color class instead of cc- token
+    expect(resultDiv.className).toContain("text-[#9ba3b4]");
+    expect(resultDiv.className).not.toContain("text-[#ff6b6b]");
   });
 
   it("renders Bash tool_result with last 20 lines and supports full output toggle", () => {

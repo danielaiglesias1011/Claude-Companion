@@ -183,7 +183,7 @@ export default function App() {
   }
 
   return (
-    <div className="fixed inset-0 flex font-sans-ui bg-cc-bg text-cc-fg antialiased pt-safe overflow-hidden overscroll-none">
+    <div className="fixed inset-0 flex font-sans-ui bg-cc-bg text-cc-fg antialiased pt-safe overflow-hidden overscroll-none app-bg">
       {/* Mobile overlay backdrop */}
       {sidebarOpen && (
         <div

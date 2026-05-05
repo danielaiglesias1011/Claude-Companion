@@ -863,10 +863,13 @@ function handleParsedMessage(
     }
 
     case "session_name_update": {
-      // Only apply auto-name if user hasn't manually renamed (still has random Adj+Noun name)
+      // Only apply auto-name if user hasn't manually renamed (still has a placeholder/random name)
       const currentName = store.sessionNames.get(sessionId);
-      const isRandomName = currentName && /^[A-Z][a-z]+ [A-Z][a-z]+$/.test(currentName);
-      if (!currentName || isRandomName) {
+      const isPlaceholderName = currentName && (
+        /^New chat( \d+)?$/.test(currentName) ||
+        /^[A-Z][a-z]+ [A-Z][a-z]+$/.test(currentName)
+      );
+      if (!currentName || isPlaceholderName) {
         store.setSessionName(sessionId, data.name);
         store.markRecentlyRenamed(sessionId);
       }
