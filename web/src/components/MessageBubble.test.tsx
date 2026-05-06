@@ -11,7 +11,7 @@ vi.mock("remark-gfm", () => ({
   default: {},
 }));
 
-import { MessageBubble } from "./MessageBubble.js";
+import { MessageBubble, extractDownloadablePaths } from "./MessageBubble.js";
 
 function makeMessage(overrides: Partial<ChatMessage> & { role: ChatMessage["role"] }): ChatMessage {
   return {
@@ -326,5 +326,112 @@ describe("MessageBubble - content block grouping", () => {
     // The two Read tools should not be grouped since there is a text block between them
     const labels = screen.getAllByText("Read File");
     expect(labels.length).toBe(2);
+  });
+});
+
+// ─── extractDownloadablePaths ─────────────────────────────────────────────────
+
+describe("extractDownloadablePaths", () => {
+  it("extracts a file path from backtick inline code", () => {
+    // Claude typically formats file paths as inline code in its responses
+    const paths = extractDownloadablePaths("The file is ready at `web/color-options.xlsx`.");
+    expect(paths).toContain("web/color-options.xlsx");
+  });
+
+  it("extracts absolute paths in backticks", () => {
+    const paths = extractDownloadablePaths("Saved to `/home/user/report.pdf`.");
+    expect(paths).toContain("/home/user/report.pdf");
+  });
+
+  it("extracts slash-separated plain text paths", () => {
+    // Paths with at least one slash are extracted from plain text
+    const paths = extractDownloadablePaths("I saved it to output/data.csv for you.");
+    expect(paths).toContain("output/data.csv");
+  });
+
+  it("does not extract bare filenames without a slash from plain text", () => {
+    // Single-word filenames in plain prose would have too many false positives
+    const paths = extractDownloadablePaths("Check report.xlsx when you are done.");
+    const noSlashPaths = paths.filter((p) => !p.includes("/"));
+    expect(noSlashPaths.length).toBe(0);
+  });
+
+  it("does not extract JS/TS source file paths", () => {
+    // Source code import paths should not appear as downloadable files
+    const paths = extractDownloadablePaths("See src/components/Button.tsx for the code.");
+    expect(paths.length).toBe(0);
+  });
+
+  it("does not extract URLs", () => {
+    const paths = extractDownloadablePaths("Download from https://example.com/file.pdf here.");
+    expect(paths.filter((p) => p.startsWith("http")).length).toBe(0);
+  });
+
+  it("deduplicates repeated mentions of the same path", () => {
+    const paths = extractDownloadablePaths(
+      "Created `output/report.xlsx`. The file `output/report.xlsx` is ready.",
+    );
+    expect(paths.filter((p) => p === "output/report.xlsx").length).toBe(1);
+  });
+
+  it("extracts multiple different downloadable files", () => {
+    const paths = extractDownloadablePaths(
+      "Generated `results.xlsx` is at `exports/results.xlsx` and `exports/summary.pdf`.",
+    );
+    // exports/results.xlsx and exports/summary.pdf should be found
+    expect(paths.some((p) => p.endsWith(".xlsx"))).toBe(true);
+    expect(paths.some((p) => p.endsWith(".pdf"))).toBe(true);
+  });
+
+  it("returns empty array when no downloadable paths are present", () => {
+    const paths = extractDownloadablePaths("Here is some text with no file paths.");
+    expect(paths).toEqual([]);
+  });
+});
+
+// ─── File download card in assistant messages ─────────────────────────────────
+
+describe("MessageBubble - file download cards", () => {
+  beforeEach(() => {
+    // fetch is called by the download handler — mock it so tests don't hit network
+    global.fetch = vi.fn().mockResolvedValue({ ok: true, blob: async () => new Blob() });
+    global.URL.createObjectURL = vi.fn(() => "blob:mock");
+    global.URL.revokeObjectURL = vi.fn();
+  });
+
+  it("renders a download card when cwd is provided and message contains a file path", () => {
+    // When an assistant message mentions a file with a downloadable extension in
+    // backticks and cwd is supplied, a download card should appear.
+    const msg = makeMessage({
+      role: "assistant",
+      content: "The file is ready at `exports/report.xlsx`.",
+    });
+    render(<MessageBubble message={msg} cwd="/workspace/project" />);
+
+    expect(screen.getByText("report.xlsx")).toBeTruthy();
+    expect(screen.getByRole("button", { name: /download/i })).toBeTruthy();
+  });
+
+  it("does not render download cards when cwd is not provided", () => {
+    // Without cwd we cannot resolve relative paths, so no cards should appear
+    const msg = makeMessage({
+      role: "assistant",
+      content: "The file is ready at `exports/report.xlsx`.",
+    });
+    render(<MessageBubble message={msg} />);
+
+    expect(screen.queryByText("report.xlsx")).toBeNull();
+  });
+
+  it("does not render download cards while the message is streaming", () => {
+    // Cards are shown only after the full response is received
+    const msg = makeMessage({
+      role: "assistant",
+      content: "Generating `exports/report.xlsx`…",
+      isStreaming: true,
+    });
+    render(<MessageBubble message={msg} cwd="/workspace/project" />);
+
+    expect(screen.queryByText("report.xlsx")).toBeNull();
   });
 });

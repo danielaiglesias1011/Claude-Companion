@@ -192,12 +192,16 @@ export function registerFsRoutes(api: Hono, opts?: { allowedBases?: string[] }):
         tiff: "image/tiff", tif: "image/tiff",
       };
       const contentType = mimeMap[ext] || "application/octet-stream";
-      return new Response(buffer, {
-        headers: {
-          "Content-Type": contentType,
-          "Cache-Control": "private, max-age=60",
-        },
-      });
+      const isInlineImage = contentType.startsWith("image/");
+      const filename = absPath.split("/").pop() || "download";
+      const headers: Record<string, string> = {
+        "Content-Type": contentType,
+        "Cache-Control": "private, max-age=60",
+      };
+      if (!isInlineImage) {
+        headers["Content-Disposition"] = `attachment; filename="${filename.replace(/"/g, '\\"')}"`;
+      }
+      return new Response(buffer, { headers });
     } catch (e: unknown) {
       return c.json({ error: e instanceof Error ? e.message : "Cannot read file" }, 404);
     }

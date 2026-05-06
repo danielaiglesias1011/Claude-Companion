@@ -371,7 +371,7 @@ function ToolMessageGroup({ group }: { group: ToolMsgGroup }) {
   );
 }
 
-function FeedEntries({ entries }: { entries: FeedEntry[] }) {
+function FeedEntries({ entries, cwd }: { entries: FeedEntry[]; cwd?: string }) {
   return (
     <>
       {entries.map((entry, i) => {
@@ -379,9 +379,9 @@ function FeedEntries({ entries }: { entries: FeedEntry[] }) {
           return <ToolMessageGroup key={entry.firstId || i} group={entry} />;
         }
         if (entry.kind === "subagent") {
-          return <SubagentContainer key={entry.taskToolUseId} group={entry} />;
+          return <SubagentContainer key={entry.taskToolUseId} group={entry} cwd={cwd} />;
         }
-        return <MessageBubble key={entry.msg.id} message={entry.msg} />;
+        return <MessageBubble key={entry.msg.id} message={entry.msg} cwd={cwd} />;
       })}
     </>
   );
@@ -443,7 +443,7 @@ function normalizeSubagentStatus(status?: string): {
   };
 }
 
-function SubagentContainer({ group }: { group: SubagentGroup }) {
+function SubagentContainer({ group, cwd }: { group: SubagentGroup; cwd?: string }) {
   const [open, setOpen] = useState(false);
   const label = group.description || "Subagent";
   const agentType = group.agentType;
@@ -570,7 +570,7 @@ function SubagentContainer({ group }: { group: SubagentGroup }) {
                 )}
               </div>
             )}
-            <FeedEntries entries={group.children} />
+            <FeedEntries entries={group.children} cwd={cwd} />
           </div>
         )}
       </div>
@@ -609,6 +609,11 @@ export function MessageFeed({ sessionId }: { sessionId: string }) {
   );
   const sessionStatus = useStore((s) => s.sessionStatus.get(sessionId));
   const toolProgress = useStore((s) => s.toolProgress.get(sessionId));
+  const sessionCwd = useStore((s) =>
+    s.sessions.get(sessionId)?.cwd ||
+    (s.sdkSessions || EMPTY_SDK_SESSIONS).find((ss) => ss.sessionId === sessionId)?.cwd ||
+    undefined
+  );
   const bottomRef = useRef<HTMLDivElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
   const isNearBottom = useRef(true);
@@ -988,7 +993,7 @@ export function MessageFeed({ sessionId }: { sessionId: string }) {
               </button>
             </div>
           )}
-          <FeedEntries entries={visibleEntries} />
+          <FeedEntries entries={visibleEntries} cwd={sessionCwd} />
 
           {/* Tool progress indicator */}
           {toolProgress && toolProgress.size > 0 && !hasStreamingAssistant && (

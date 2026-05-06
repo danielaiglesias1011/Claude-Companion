@@ -44,6 +44,8 @@ vi.mock("../store.js", () => ({
       chatTabReentryTickBySession:
         mockStoreValues.chatTabReentryTickBySession ?? new Map(),
       sdkSessions: mockStoreValues.sdkSessions ?? [],
+      // sessions map provides bridge-session data (cwd, etc.)
+      sessions: mockStoreValues.sessions ?? new Map(),
     };
     return selector(state);
   },

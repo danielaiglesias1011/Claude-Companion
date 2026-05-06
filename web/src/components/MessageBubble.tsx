@@ -4,7 +4,7 @@ import remarkGfm from "remark-gfm";
 import type { ChatMessage, ContentBlock } from "../types.js";
 import { ToolBlock, getToolIcon, getToolLabel, getPreview, ToolIcon } from "./ToolBlock.js";
 
-export function MessageBubble({ message }: { message: ChatMessage }) {
+export function MessageBubble({ message, cwd }: { message: ChatMessage; cwd?: string }) {
   if (message.role === "system") {
     return (
       <div className="flex items-center gap-3 py-1 min-w-0">
@@ -44,7 +44,7 @@ export function MessageBubble({ message }: { message: ChatMessage }) {
   // Assistant message
   return (
     <div className="animate-[fadeSlideIn_0.2s_ease-out]">
-      <AssistantMessage message={message} />
+      <AssistantMessage message={message} cwd={cwd} />
     </div>
   );
 }
@@ -107,12 +107,16 @@ function getMessageText(message: ChatMessage): string {
   return message.content || "";
 }
 
-function AssistantMessage({ message }: { message: ChatMessage }) {
+function AssistantMessage({ message, cwd }: { message: ChatMessage; cwd?: string }) {
   const blocks = message.contentBlocks || [];
 
   const grouped = useMemo(() => groupContentBlocks(blocks), [blocks]);
   const toolUseById = useMemo(() => mapToolUsesById(blocks), [blocks]);
   const copyText = useMemo(() => getMessageText(message), [message]);
+  const downloadablePaths = useMemo(
+    () => (!message.isStreaming && cwd ? extractDownloadablePaths(copyText) : []),
+    [copyText, cwd, message.isStreaming],
+  );
 
   if (blocks.length === 0 && message.content) {
     return (
@@ -120,6 +124,9 @@ function AssistantMessage({ message }: { message: ChatMessage }) {
         <AssistantAvatar />
         <div className="flex-1 min-w-0">
           <MarkdownContent text={message.content} showCursor={!!message.isStreaming} />
+          {downloadablePaths.length > 0 && cwd && (
+            <FileDownloadCards paths={downloadablePaths} cwd={cwd} />
+          )}
           {!message.isStreaming && copyText && (
             <div className="mt-1.5">
               <CopyButton text={copyText} label="Copy response" />
@@ -144,6 +151,9 @@ function AssistantMessage({ message }: { message: ChatMessage }) {
           }
           return <ToolGroupBlock key={i} name={group.name} items={group.items} />;
         })}
+        {downloadablePaths.length > 0 && cwd && (
+          <FileDownloadCards paths={downloadablePaths} cwd={cwd} />
+        )}
         {!message.isStreaming && copyText && (
           <div className="mt-1.5">
             <CopyButton text={copyText} label="Copy response" />
@@ -436,7 +446,128 @@ function CopyButton({ text, label = "Copy" }: { text: string; label?: string }) 
   );
 }
 
-const DOWNLOADABLE_EXTENSIONS = /\.(docx?|xlsx?|pptx?|pdf|csv|zip|gz|json|txt|md)$/i;
+// Extensions that are user-facing output files (not source code)
+const DOWNLOADABLE_EXTENSIONS = /\.(docx?|xlsx?|xlsm|pptx?|pdf|csv|zip|tar\.gz|gz|html?|png|jpg|jpeg|gif|webp|svg|mp4|mp3|wav)$/i;
+
+const FILE_TYPE_LABELS: Record<string, string> = {
+  xlsx: "Excel spreadsheet", xls: "Excel spreadsheet", xlsm: "Excel spreadsheet",
+  docx: "Word document", doc: "Word document",
+  pptx: "PowerPoint", ppt: "PowerPoint",
+  pdf: "PDF document",
+  csv: "CSV spreadsheet",
+  zip: "ZIP archive", gz: "Archive", tar: "Archive",
+  html: "HTML file", htm: "HTML file",
+  png: "PNG image", jpg: "JPEG image", jpeg: "JPEG image",
+  gif: "GIF image", webp: "WebP image", svg: "SVG image",
+  mp4: "MP4 video", mp3: "MP3 audio", wav: "WAV audio",
+};
+
+export function extractDownloadablePaths(text: string): string[] {
+  const paths = new Set<string>();
+
+  // 1. Paths in backticks: `some/path/file.xlsx` or `file.xlsx`
+  const backtickRe = /`([^`\n]+)`/g;
+  let m: RegExpExecArray | null;
+  while ((m = backtickRe.exec(text)) !== null) {
+    const candidate = m[1].trim();
+    if (DOWNLOADABLE_EXTENSIONS.test(candidate) && !candidate.includes(" ")) {
+      paths.add(candidate);
+    }
+  }
+
+  // 2. Plain-text paths that contain at least one slash (reduces false positives)
+  //    e.g. "saved to web/report.xlsx" but NOT bare "report.xlsx" in prose
+  const slashPathRe = /(?:^|[\s,;:"])([./~]?(?:[\w.-]+\/)+[\w.-]+\.(?:xlsx?|xlsm|docx?|pptx?|pdf|csv|zip|html?|png|jpg|jpeg|gif|webp|mp4|mp3|wav))(?=[,\s.!?)"']|$)/gim;
+  while ((m = slashPathRe.exec(text)) !== null) {
+    const candidate = m[1].trim();
+    // Skip if it looks like a JS/TS import or URL
+    if (/^https?:\/\//.test(candidate)) continue;
+    if (/\.(js|ts|tsx|jsx|css|json|md|py|rb|go|rs|java|sh)$/.test(candidate)) continue;
+    paths.add(candidate);
+  }
+
+  return Array.from(paths);
+}
+
+function FileDownloadCards({ paths, cwd }: { paths: string[]; cwd: string }) {
+  return (
+    <div className="flex flex-col gap-2 mt-3">
+      {paths.map((p) => (
+        <FileDownloadCard key={p} filePath={p} cwd={cwd} />
+      ))}
+    </div>
+  );
+}
+
+function FileDownloadCard({ filePath, cwd }: { filePath: string; cwd: string }) {
+  const [state, setState] = useState<"idle" | "loading" | "error">("idle");
+  const filename = filePath.split("/").pop() || filePath;
+  const ext = filename.split(".").pop()?.toLowerCase() || "";
+  const absPath = filePath.startsWith("/") || filePath.startsWith("~")
+    ? filePath
+    : `${cwd}/${filePath}`;
+  const typeLabel = FILE_TYPE_LABELS[ext] || "File";
+
+  const handleDownload = async () => {
+    setState("loading");
+    try {
+      const res = await fetch(`/api/fs/raw?path=${encodeURIComponent(absPath)}`);
+      if (!res.ok) throw new Error("Not found");
+      const blob = await res.blob();
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = filename;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+      setState("idle");
+    } catch {
+      setState("error");
+      setTimeout(() => setState("idle"), 3000);
+    }
+  };
+
+  return (
+    <div className="flex items-center gap-3 px-3.5 py-2.5 rounded-xl bg-[rgba(10,14,24,0.85)] border border-[rgba(255,79,163,0.18)] max-w-sm shadow-[0_2px_12px_rgba(0,0,0,0.2)]">
+      <div className="w-9 h-9 rounded-lg bg-[rgba(255,79,163,0.1)] border border-[rgba(255,79,163,0.18)] flex items-center justify-center shrink-0">
+        <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className="w-4 h-4 text-[#ff4fa3]">
+          <path d="M9 1H4a1 1 0 00-1 1v12a1 1 0 001 1h8a1 1 0 001-1V5L9 1z" />
+          <polyline points="9 1 9 5 13 5" />
+          <line x1="7" y1="9" x2="9" y2="9" />
+          <line x1="7" y1="11" x2="9" y2="11" />
+        </svg>
+      </div>
+      <div className="flex-1 min-w-0">
+        <p className="text-[13px] font-medium text-[#f6f7fb] truncate">{filename}</p>
+        <p className="text-[11px] text-[#9ba3b4]">{typeLabel}</p>
+      </div>
+      <button
+        onClick={handleDownload}
+        disabled={state === "loading"}
+        className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-gradient-to-b from-[rgba(255,79,163,0.2)] to-[rgba(255,79,163,0.1)] text-[#ff4fa3] text-[12px] font-medium border border-[rgba(255,79,163,0.28)] hover:brightness-110 transition-all cursor-pointer disabled:opacity-50 shrink-0"
+      >
+        {state === "loading" ? (
+          <svg className="w-3.5 h-3.5 animate-spin" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="2">
+            <circle cx="8" cy="8" r="6" strokeOpacity="0.3" />
+            <path d="M8 2a6 6 0 016 6" strokeLinecap="round" />
+          </svg>
+        ) : state === "error" ? (
+          <span className="text-[#ff6b6b]">Not found</span>
+        ) : (
+          <>
+            <svg className="w-3.5 h-3.5" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M8 2v8M5 7l3 3 3-3" />
+              <path d="M2 12v1a1 1 0 001 1h10a1 1 0 001-1v-1" />
+            </svg>
+            Download
+          </>
+        )}
+      </button>
+    </div>
+  );
+}
 
 function DownloadLink({ path, children }: { path: string; children: ReactNode }) {
   const [downloading, setDownloading] = useState(false);
