@@ -172,7 +172,27 @@ export function registerFsRoutes(api: Hono, opts?: { allowedBases?: string[] }):
   api.get("/fs/raw", async (c) => {
     const filePath = c.req.query("path");
     if (!filePath) return c.json({ error: "path required" }, 400);
-    const absPath = guardPath(filePath, allowedBases());
+
+    // When a session cwd is provided, try to find the file by checking both
+    // cwd/relPath and parent(cwd)/relPath. Claude often reports paths relative
+    // to the repo root even when its cwd is a subdirectory (e.g. "web/file.xlsx"
+    // when cwd="/project/web"), causing a doubled segment. The fallback strips
+    // the first path component so both styles resolve correctly.
+    const sessionCwd = c.req.query("cwd");
+    let absPath: string | null = null;
+    if (sessionCwd && !filePath.startsWith("/")) {
+      const candidates = [
+        resolve(join(sessionCwd, filePath)),
+        resolve(join(dirname(sessionCwd), filePath)),
+      ];
+      for (const candidate of candidates) {
+        const guarded = guardPath(candidate, allowedBases());
+        if (guarded) {
+          try { await stat(guarded); absPath = guarded; break; } catch { /* try next */ }
+        }
+      }
+    }
+    if (!absPath) absPath = guardPath(filePath, allowedBases());
     if (!absPath) return c.json({ error: "Path outside allowed directories" }, 403);
     try {
       const info = await stat(absPath);

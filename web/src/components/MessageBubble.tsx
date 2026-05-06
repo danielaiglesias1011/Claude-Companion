@@ -504,15 +504,21 @@ function FileDownloadCard({ filePath, cwd }: { filePath: string; cwd: string }) 
   const [state, setState] = useState<"idle" | "loading" | "error">("idle");
   const filename = filePath.split("/").pop() || filePath;
   const ext = filename.split(".").pop()?.toLowerCase() || "";
-  const absPath = filePath.startsWith("/") || filePath.startsWith("~")
-    ? filePath
-    : `${cwd}/${filePath}`;
   const typeLabel = FILE_TYPE_LABELS[ext] || "File";
+
+  // Build the URL: for absolute paths send path only; for relative paths send
+  // path + cwd so the server can try cwd/path and parent(cwd)/path as fallbacks.
+  const buildUrl = () => {
+    if (filePath.startsWith("/") || filePath.startsWith("~")) {
+      return `/api/fs/raw?path=${encodeURIComponent(filePath)}`;
+    }
+    return `/api/fs/raw?path=${encodeURIComponent(filePath)}&cwd=${encodeURIComponent(cwd)}`;
+  };
 
   const handleDownload = async () => {
     setState("loading");
     try {
-      const res = await fetch(`/api/fs/raw?path=${encodeURIComponent(absPath)}`, {
+      const res = await fetch(buildUrl(), {
         headers: getAuthHeadersPublic(),
       });
       if (!res.ok) throw new Error("Not found");
@@ -579,6 +585,7 @@ function DownloadLink({ path, children }: { path: string; children: ReactNode })
   const handleDownload = async () => {
     setDownloading(true);
     try {
+      // path here comes from a markdown link — always treated as provided
       const res = await fetch(`/api/fs/raw?path=${encodeURIComponent(path)}`, {
         headers: getAuthHeadersPublic(),
       });
