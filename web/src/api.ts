@@ -12,6 +12,10 @@ function getAuthHeaders(): Record<string, string> {
   return { Authorization: `Bearer ${token}` };
 }
 
+export function getAuthHeadersPublic(): Record<string, string> {
+  return getAuthHeaders();
+}
+
 function handle401(status: number): void {
   if (status === 401 && typeof window !== "undefined") {
     localStorage.removeItem(AUTH_STORAGE_KEY);

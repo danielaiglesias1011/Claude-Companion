@@ -3,6 +3,7 @@ import Markdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 import type { ChatMessage, ContentBlock } from "../types.js";
 import { ToolBlock, getToolIcon, getToolLabel, getPreview, ToolIcon } from "./ToolBlock.js";
+import { getAuthHeadersPublic } from "../api.js";
 
 export function MessageBubble({ message, cwd }: { message: ChatMessage; cwd?: string }) {
   if (message.role === "system") {
@@ -511,7 +512,9 @@ function FileDownloadCard({ filePath, cwd }: { filePath: string; cwd: string }) 
   const handleDownload = async () => {
     setState("loading");
     try {
-      const res = await fetch(`/api/fs/raw?path=${encodeURIComponent(absPath)}`);
+      const res = await fetch(`/api/fs/raw?path=${encodeURIComponent(absPath)}`, {
+        headers: getAuthHeadersPublic(),
+      });
       if (!res.ok) throw new Error("Not found");
       const blob = await res.blob();
       const url = URL.createObjectURL(blob);
@@ -576,7 +579,9 @@ function DownloadLink({ path, children }: { path: string; children: ReactNode })
   const handleDownload = async () => {
     setDownloading(true);
     try {
-      const res = await fetch(`/api/fs/raw?path=${encodeURIComponent(path)}`);
+      const res = await fetch(`/api/fs/raw?path=${encodeURIComponent(path)}`, {
+        headers: getAuthHeadersPublic(),
+      });
       if (!res.ok) throw new Error("File not found");
       const blob = await res.blob();
       const url = URL.createObjectURL(blob);

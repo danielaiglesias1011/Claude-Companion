@@ -394,7 +394,7 @@ describe("extractDownloadablePaths", () => {
 describe("MessageBubble - file download cards", () => {
   beforeEach(() => {
     // fetch is called by the download handler — mock it so tests don't hit network
-    global.fetch = vi.fn().mockResolvedValue({ ok: true, blob: async () => new Blob() });
+    global.fetch = vi.fn().mockResolvedValue({ ok: true, blob: async () => new Blob() }) as unknown as typeof fetch;
     global.URL.createObjectURL = vi.fn(() => "blob:mock");
     global.URL.revokeObjectURL = vi.fn();
   });
